@@ -55,5 +55,5 @@ export async function register(_: unknown, formData: FormData): Promise<string |
     return error.message
   }
 
-  redirect('/check-email')
+  redirect('/pending-payment')
 }
