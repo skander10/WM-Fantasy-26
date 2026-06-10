@@ -175,7 +175,7 @@ export function TournamentClient({
     {
       icon: '🎯',
       label: 'Meiste Assists',
-      pts: 35,
+      pts: 25,
       content: (
         <TextInput value={assists} onChange={setAssists}
           placeholder="z.B. Kevin De Bruyne" disabled={isLocked} />
