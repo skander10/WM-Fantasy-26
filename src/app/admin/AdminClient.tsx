@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Check, X } from 'lucide-react'
-import { setUserPaid, saveMatchResult, setTournamentLocked } from '@/app/actions/admin'
+import { setUserPaid, saveMatchResult, setTournamentLocked, saveTournamentResults, calculateTournamentPoints } from '@/app/actions/admin'
 
 type Player = {
   id: string
@@ -12,7 +12,6 @@ type Player = {
   paid: boolean
 }
 
-type Team = { name: string; flag: string }
 type Match = {
   id: number
   match_date: string
@@ -24,16 +23,41 @@ type Match = {
   away_team: Team
 }
 
+type Team = { id: number; name: string; flag: string; group_name: string }
+type TournamentResults = {
+  champion_team_id: number | null
+  second_team_id: number | null
+  third_team_id: number | null
+  top_scorer: string | null
+  top_assist_player: string | null
+  best_player: string | null
+  tunisia_advances: boolean | null
+  calculated_at: string | null
+}
+
 export function AdminClient({
   players,
   matches,
   tournamentLocked,
+  teams,
+  tournamentResults,
 }: {
   players: Player[]
   matches: Match[]
   tournamentLocked: boolean
+  teams: Team[]
+  tournamentResults: TournamentResults | null
 }) {
-  const [tab, setTab] = useState<'players' | 'matches' | 'settings'>('matches')
+  const [tab, setTab] = useState<'players' | 'matches' | 'settings' | 'tournament'>('matches')
+  const [tChampion, setTChampion] = useState(String(tournamentResults?.champion_team_id ?? ''))
+  const [tSecond, setTSecond] = useState(String(tournamentResults?.second_team_id ?? ''))
+  const [tThird, setTThird] = useState(String(tournamentResults?.third_team_id ?? ''))
+  const [tScorer, setTScorer] = useState(tournamentResults?.top_scorer ?? '')
+  const [tAssist, setTAssist] = useState(tournamentResults?.top_assist_player ?? '')
+  const [tBest, setTBest] = useState(tournamentResults?.best_player ?? '')
+  const [tTunisia, setTTunisia] = useState<string>(
+    tournamentResults?.tunisia_advances === null ? '' : tournamentResults?.tunisia_advances ? 'yes' : 'no'
+  )
   const [scores, setScores] = useState<Record<number, { home: string; away: string }>>({})
   const [feedback, setFeedback] = useState<Record<string, string>>({})
   const [isPending, startTransition] = useTransition()
@@ -79,7 +103,7 @@ export function AdminClient({
 
       {/* Tab-Leiste */}
       <div className="flex gap-2 mb-6 bg-slate-800 rounded-xl p-1">
-        {(['matches', 'players', 'settings'] as const).map(t => (
+        {(['matches', 'players', 'tournament', 'settings'] as const).map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -87,7 +111,7 @@ export function AdminClient({
               tab === t ? 'bg-amber-400 text-slate-900' : 'text-slate-400 hover:text-white'
             }`}
           >
-            {t === 'matches' ? '⚽ Spiele' : t === 'players' ? '👥 Spieler' : '⚙️ Einst.'}
+            {t === 'matches' ? '⚽ Spiele' : t === 'players' ? '👥 Spieler' : t === 'tournament' ? '🏆 Turnier' : '⚙️ Einst.'}
           </button>
         ))}
       </div>
@@ -155,6 +179,112 @@ export function AdminClient({
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Tab: Turnier-Auswertung */}
+      {tab === 'tournament' && (
+        <div className="flex flex-col gap-4">
+          <p className="text-slate-400 text-xs">Trage das echte Turnier-Ergebnis ein und berechne die Punkte für alle Spieler.</p>
+
+          {tournamentResults?.calculated_at && (
+            <div className="bg-emerald-400/10 border border-emerald-400/30 rounded-xl px-4 py-3 text-xs text-emerald-400">
+              ✅ Punkte wurden berechnet am {new Date(tournamentResults.calculated_at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}
+            </div>
+          )}
+
+          {/* Team-Picks */}
+          {[
+            { label: '🏆 Weltmeister', val: tChampion, set: setTChampion },
+            { label: '🥈 Finalist', val: tSecond, set: setTSecond },
+            { label: '🥉 Dritter Platz', val: tThird, set: setTThird },
+          ].map(({ label, val, set }) => {
+            const grouped = teams.reduce<Record<string, Team[]>>((acc, t) => {
+              if (!acc[t.group_name]) acc[t.group_name] = []
+              acc[t.group_name].push(t)
+              return acc
+            }, {})
+            return (
+              <div key={label} className="bg-slate-800 border border-slate-700 rounded-xl p-3">
+                <p className="text-white text-sm font-medium mb-2">{label}</p>
+                <select value={val} onChange={e => set(e.target.value)}
+                  className="w-full bg-slate-700 border border-slate-600 focus:border-amber-400 focus:outline-none rounded-lg text-white text-sm px-3 py-2">
+                  <option value="">— Team auswählen —</option>
+                  {Object.entries(grouped).sort().map(([grp, ts]) => (
+                    <optgroup key={grp} label={`Gruppe ${grp}`}>
+                      {ts.map(t => <option key={t.id} value={t.id}>{t.flag} {t.name}</option>)}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+            )
+          })}
+
+          {/* Text-Felder */}
+          {[
+            { label: '👟 Torschützenkönig', val: tScorer, set: setTScorer, ph: 'z.B. Kylian Mbappé' },
+            { label: '🎯 Meiste Assists', val: tAssist, set: setTAssist, ph: 'z.B. Kevin De Bruyne' },
+            { label: '⭐ Bester Spieler', val: tBest, set: setTBest, ph: 'z.B. Erling Haaland' },
+          ].map(({ label, val, set, ph }) => (
+            <div key={label} className="bg-slate-800 border border-slate-700 rounded-xl p-3">
+              <p className="text-white text-sm font-medium mb-2">{label}</p>
+              <input type="text" value={val} onChange={e => set(e.target.value)} placeholder={ph}
+                className="w-full bg-slate-700 border border-slate-600 focus:border-amber-400 focus:outline-none rounded-lg text-white text-sm px-3 py-2 placeholder-slate-500" />
+            </div>
+          ))}
+
+          {/* Tunesien */}
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-3">
+            <p className="text-white text-sm font-medium mb-2">🇹🇳 Hat Tunesien die nächste Runde geschafft?</p>
+            <div className="flex gap-2">
+              {[{ val: 'yes', label: '✅ Ja' }, { val: 'no', label: '❌ Nein' }].map(opt => (
+                <button key={opt.val} onClick={() => setTTunisia(opt.val)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                    tTunisia === opt.val ? 'bg-amber-400 border-amber-400 text-slate-900' : 'bg-slate-700 border-slate-600 text-slate-300'
+                  }`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {feedback['tournament_save'] && (
+            <p className={`text-sm text-center ${feedback['tournament_save'].includes('✅') ? 'text-emerald-400' : 'text-red-400'}`}>
+              {feedback['tournament_save']}
+            </p>
+          )}
+
+          {/* Speichern */}
+          <button
+            disabled={isPending}
+            onClick={() => {
+              startTransition(async () => {
+                const err = await saveTournamentResults({
+                  championId: Number(tChampion), secondId: Number(tSecond), thirdId: Number(tThird),
+                  topScorer: tScorer, topAssistPlayer: tAssist, bestPlayer: tBest,
+                  tunisiaAdvances: tTunisia === 'yes',
+                })
+                showFeedback('tournament_save', err ?? 'Ergebnis gespeichert ✅')
+              })
+            }}
+            className="w-full bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white font-semibold py-3 rounded-xl text-sm transition-colors"
+          >
+            💾 Ergebnis speichern
+          </button>
+
+          {/* Punkte berechnen */}
+          <button
+            disabled={isPending}
+            onClick={() => {
+              startTransition(async () => {
+                const err = await calculateTournamentPoints()
+                showFeedback('tournament_save', err ?? '🎉 Punkte für alle Spieler berechnet!')
+              })
+            }}
+            className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-slate-900 font-bold py-3 rounded-xl text-sm transition-colors"
+          >
+            🏆 Turnier-Punkte jetzt berechnen
+          </button>
         </div>
       )}
 

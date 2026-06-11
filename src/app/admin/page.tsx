@@ -32,6 +32,16 @@ export default async function AdminPage() {
     `)
     .order('match_date', { ascending: true })
 
+  const { data: teams } = await supabase
+    .from('teams')
+    .select('id, name, flag, group_name')
+    .order('group_name').order('name')
+
+  const { data: tournamentResults } = await supabase
+    .from('tournament_results')
+    .select('*')
+    .maybeSingle()
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-900">
       <Navbar isAdmin />
@@ -39,6 +49,8 @@ export default async function AdminPage() {
         players={(players ?? []) as any}
         matches={(matches ?? []) as any}
         tournamentLocked={lockSetting?.value === 'true'}
+        teams={(teams ?? []) as any}
+        tournamentResults={tournamentResults ?? null}
       />
     </div>
   )
