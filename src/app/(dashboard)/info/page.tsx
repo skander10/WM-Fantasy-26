@@ -18,6 +18,7 @@ const content = {
       { icon: '✅', title: 'Freischaltung', desc: 'Nach Zahlungseingang wird dein Konto vom Admin freigeschaltet. Du bekommst Zugang zum Tippen.' },
       { icon: '⚽', title: 'Spiele tippen', desc: 'Tippe vor Spielbeginn das Ergebnis jedes WM-Spiels. Tipps nach Anpfiff sind nicht mehr möglich.' },
       { icon: '🏆', title: 'Turnier-Tipps', desc: 'In den ersten Tagen des Turniers gibst du einmalig deine Turnier-Vorhersagen ab. Danach gesperrt.' },
+      { icon: '👀', title: 'Tipps-Vergleich', desc: 'Nach jedem Spieltag siehst du unter "Vergleich" die Tipps aller Spieler — Grün (10 Pkt), Gelb (5 Pkt), Rot (0 Pkt).' },
       { icon: '📊', title: 'Rangliste', desc: 'Die Punkte werden automatisch nach jedem Spiel berechnet. Den aktuellen Stand siehst du in der Rangliste.' },
     ],
     matchPoints: [
@@ -56,6 +57,7 @@ const content = {
       { icon: '✅', title: 'Activation', desc: 'Once payment is received, your account will be activated by the admin. You get full access to place predictions.' },
       { icon: '⚽', title: 'Predict matches', desc: 'Predict the result of each World Cup match before kick-off. Predictions are locked once the match starts.' },
       { icon: '🏆', title: 'Tournament predictions', desc: 'In the first days of the tournament, submit your one-time tournament predictions. Locked after submission.' },
+      { icon: '👀', title: 'Tips comparison', desc: 'After each matchday, check "Compare" to see all players\' predictions — Green (10 pts), Yellow (5 pts), Red (0 pts).' },
       { icon: '📊', title: 'Leaderboard', desc: 'Points are calculated automatically after each match. Check the current standings in the leaderboard.' },
     ],
     matchPoints: [
