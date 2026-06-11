@@ -41,6 +41,7 @@ export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
     { href: '/predict/matches', label: '⚽ Tippen' },
     { href: '/predict/tournament', label: '🏆 Turnier' },
     { href: '/ranking', label: '📊 Ranking' },
+    { href: '/results', label: '👀 Vergleich' },
     { href: '/my-scores', label: '📋 Punkte' },
     { href: '/info', label: 'ℹ️ Info' },
   ]
