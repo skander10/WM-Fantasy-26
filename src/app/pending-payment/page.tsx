@@ -17,14 +17,14 @@ export default function PendingPaymentPage() {
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 mb-5">
           <p className="text-slate-300 text-sm leading-relaxed">
             Um mitspielen zu können, überweise einmalig{' '}
-            <span className="text-amber-400 font-bold text-base">2 €</span>{' '}
+            <span className="text-amber-400 font-bold text-base">5 €</span>{' '}
             via PayPal. Danach bekommst du vollen Zugang zu allen Tipps.
           </p>
         </div>
 
         {/* PayPal Button */}
         <a
-          href="https://paypal.me/SkanderGhedira/2"
+          href="https://paypal.me/SkanderGhedira/5"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full bg-[#0070BA] hover:bg-[#005ea6] active:bg-[#004f8f] text-white font-semibold py-4 rounded-full transition-colors text-base mb-6"

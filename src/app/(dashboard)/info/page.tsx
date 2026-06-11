@@ -17,7 +17,7 @@ export default function InfoPage() {
 
   const steps = [
     { icon: '📝', title: 'Registrieren', desc: 'Konto erstellen mit Vorname, Nachname, Username und Email.' },
-    { icon: '💶', title: '2€ bezahlen', desc: 'Einmalige Teilnahmegebühr via PayPal.me/SkanderGhedira/2 überweisen. Deinen Username als Verwendungszweck angeben.' },
+    { icon: '💶', title: '5€ bezahlen', desc: 'Einmalige Teilnahmegebühr via PayPal.me/SkanderGhedira/5 überweisen. Deinen Username als Verwendungszweck angeben.' },
     { icon: '✅', title: 'Freischaltung', desc: 'Nach Zahlungseingang wird dein Konto vom Admin freigeschaltet. Du bekommst Zugang zum Tippen.' },
     { icon: '⚽', title: 'Spiele tippen', desc: 'Tippe vor Spielbeginn das Ergebnis jedes WM-Spiels. Tipps nach Anpfiff sind nicht mehr möglich.' },
     { icon: '🏆', title: 'Turnier-Tipps', desc: 'In den ersten Tagen des Turniers gibst du einmalig deine Turnier-Vorhersagen ab. Danach gesperrt.' },
@@ -117,7 +117,7 @@ export default function InfoPage() {
             'Tipps müssen vor Spielbeginn abgegeben werden — danach ist das Eingabefeld gesperrt.',
             'Turnier-Tipps können nur einmal abgegeben werden und sind danach nicht mehr änderbar.',
             'Bei Punktegleichstand entscheidet die Anzahl der exakten Ergebnisse.',
-            'Die Teilnahmegebühr von 2€ ist einmalig und nicht erstattbar.',
+            'Die Teilnahmegebühr von 5€ ist einmalig und nicht erstattbar.',
           ].map((rule, i) => (
             <div key={i} className="flex items-start gap-2.5">
               <span className="text-amber-400 text-xs font-bold mt-0.5 shrink-0">{i + 1}.</span>
