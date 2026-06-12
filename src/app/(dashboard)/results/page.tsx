@@ -10,20 +10,19 @@ type Match = {
   home_team: Team
   away_team: Team
 }
+type StartedMatch = {
+  id: number
+  match_date: string
+  round: string
+  home_team: Team
+  away_team: Team
+}
 type Pick = {
   match_id: number
   home_pick: number | null
   away_pick: number | null
   points_earned: number | null
   user_id: string
-  profiles: { username: string; first_name: string; last_name: string }
-}
-type TodayMatch = {
-  id: number
-  match_date: string
-  round: string
-  home_team: Team
-  away_team: Team
 }
 type ParticipationRow = { match_id: number; username: string }
 
@@ -61,6 +60,7 @@ function groupByDate(matches: Match[]): Record<string, Match[]> {
 
 export default async function ResultsPage() {
   const supabase = await createClient()
+  const now = new Date().toISOString()
 
   // Total registered users
   const { count: totalUsers } = await supabase
@@ -76,60 +76,77 @@ export default async function ResultsPage() {
 
   const paidCount = players?.length ?? 0
 
-  // Today's scheduled matches (Berlin time)
+  // ── 1. Noch nicht gestartet (scheduled + match_date > now) ──────────────
+  const { data: participationData } = await supabase.rpc('get_today_participation')
+  const participation = (participationData ?? []) as ParticipationRow[]
+
+  // Heute noch nicht gestartete Spiele (für Teilnahme-Anzeige)
   const nowBerlin = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' })
   const todayStart = new Date(nowBerlin + 'T00:00:00+02:00').toISOString()
-  const todayEnd   = new Date(nowBerlin + 'T23:59:59+02:00').toISOString()
 
-  const { data: rawTodayMatches } = await supabase
+  const { data: rawUpcoming } = await supabase
     .from('matches')
     .select('id, match_date, round, home_team:home_team_id(name, flag), away_team:away_team_id(name, flag)')
     .eq('status', 'scheduled')
     .gte('match_date', todayStart)
-    .lte('match_date', todayEnd)
+    .gt('match_date', now)
     .order('match_date', { ascending: true })
 
-  const todayMatches = (rawTodayMatches ?? []) as unknown as TodayMatch[]
+  const upcomingToday = (rawUpcoming ?? []) as unknown as StartedMatch[]
 
-  // Today's participation (usernames only, no scores)
-  const { data: participationData } = await supabase.rpc('get_today_participation')
-  const participation = (participationData ?? []) as ParticipationRow[]
+  // ── 2. Gestartet aber noch nicht fertig (scheduled + match_date <= now) ─
+  const { data: rawStarted } = await supabase
+    .from('matches')
+    .select('id, match_date, round, home_team:home_team_id(name, flag), away_team:away_team_id(name, flag)')
+    .eq('status', 'scheduled')
+    .lte('match_date', now)
+    .order('match_date', { ascending: false })
 
-  // Fertige Spiele der letzten 2 Tage
+  const startedMatches = (rawStarted ?? []) as unknown as StartedMatch[]
+
+  // Picks für gestartete Spiele laden
+  let startedPicks: Pick[] = []
+  if (startedMatches.length > 0) {
+    const ids = startedMatches.map(m => m.id)
+    const { data } = await supabase
+      .from('match_picks')
+      .select('match_id, home_pick, away_pick, points_earned, user_id')
+      .in('match_id', ids)
+    startedPicks = (data ?? []) as Pick[]
+  }
+
+  // ── 3. Fertige Spiele (status = finished) ───────────────────────────────
   const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
 
-  const { data: rawMatches } = await supabase
+  const { data: rawFinished } = await supabase
     .from('matches')
     .select('id, match_date, home_score, away_score, round, home_team:home_team_id(name, flag), away_team:away_team_id(name, flag)')
     .eq('status', 'finished')
     .gte('match_date', twoDaysAgo)
     .order('match_date', { ascending: false })
 
-  const matches = (rawMatches ?? []) as unknown as Match[]
-
-  let displayMatches = matches
-  if (matches.length === 0) {
+  let displayFinished = (rawFinished ?? []) as unknown as Match[]
+  if (displayFinished.length === 0) {
     const { data: fallback } = await supabase
       .from('matches')
       .select('id, match_date, home_score, away_score, round, home_team:home_team_id(name, flag), away_team:away_team_id(name, flag)')
       .eq('status', 'finished')
       .order('match_date', { ascending: false })
       .limit(5)
-    displayMatches = (fallback ?? []) as unknown as Match[]
+    displayFinished = (fallback ?? []) as unknown as Match[]
   }
 
-  // Picks for finished matches
-  let picks: Pick[] = []
-  if (displayMatches.length > 0) {
-    const matchIds = displayMatches.map(m => m.id)
-    const { data: rawPicks } = await supabase
+  let finishedPicks: Pick[] = []
+  if (displayFinished.length > 0) {
+    const ids = displayFinished.map(m => m.id)
+    const { data } = await supabase
       .from('match_picks')
-      .select('match_id, home_pick, away_pick, points_earned, user_id, profiles:user_id(username, first_name, last_name)')
-      .in('match_id', matchIds)
-    picks = (rawPicks ?? []) as unknown as Pick[]
+      .select('match_id, home_pick, away_pick, points_earned, user_id')
+      .in('match_id', ids)
+    finishedPicks = (data ?? []) as Pick[]
   }
 
-  const groups = groupByDate(displayMatches)
+  const finishedGroups = groupByDate(displayFinished)
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
@@ -147,15 +164,14 @@ export default async function ResultsPage() {
         </div>
       </div>
 
-      {/* Heutige Spiele – Teilnahme */}
-      {todayMatches.length > 0 && (
+      {/* ── Heute noch nicht gestartet: Teilnahme ── */}
+      {upcomingToday.length > 0 && (
         <section className="mb-8">
           <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-3">Heute · Wer hat getippt?</p>
           <div className="flex flex-col gap-3">
-            {todayMatches.map(match => {
+            {upcomingToday.map(match => {
               const tipped = participation.filter(p => p.match_id === match.id)
               const tippedCount = tipped.length
-
               return (
                 <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
                   <div className="flex items-start justify-between mb-3">
@@ -166,26 +182,22 @@ export default async function ResultsPage() {
                       </p>
                     </div>
                     <div className="shrink-0 ml-4 text-right">
-                      <p className="text-xl font-bold text-white">{tippedCount}<span className="text-slate-500 text-sm font-normal">/{paidCount}</span></p>
+                      <p className="text-xl font-bold text-white">
+                        {tippedCount}<span className="text-slate-500 text-sm font-normal">/{paidCount}</span>
+                      </p>
                       <p className="text-slate-500 text-xs">getippt</p>
                     </div>
                   </div>
-
-                  {/* Progress bar */}
                   <div className="w-full bg-slate-700 rounded-full h-1.5 mb-3">
                     <div
-                      className="bg-amber-400 h-1.5 rounded-full transition-all"
+                      className="bg-amber-400 h-1.5 rounded-full"
                       style={{ width: paidCount > 0 ? `${Math.round((tippedCount / paidCount) * 100)}%` : '0%' }}
                     />
                   </div>
-
                   {tipped.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {tipped.map(p => (
-                        <span
-                          key={p.username}
-                          className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs px-2 py-0.5 rounded-lg font-medium"
-                        >
+                        <span key={p.username} className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs px-2 py-0.5 rounded-lg font-medium">
                           ✓ {p.username}
                         </span>
                       ))}
@@ -200,25 +212,69 @@ export default async function ResultsPage() {
         </section>
       )}
 
-      {/* Fertige Spiele */}
-      {displayMatches.length === 0 ? (
+      {/* ── Gestartet, noch kein Ergebnis: Tipps sichtbar, keine Farben ── */}
+      {startedMatches.length > 0 && (
+        <section className="mb-8">
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-3">🔴 Läuft gerade · Tipps sichtbar</p>
+          <div className="flex flex-col gap-4">
+            {startedMatches.map(match => {
+              const matchPicks = startedPicks.filter(p => p.match_id === match.id)
+              const picksMap = Object.fromEntries(matchPicks.map(p => [p.user_id, p]))
+              return (
+                <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                  <p className="text-slate-500 text-xs mb-2">{formatDate(match.match_date)} · {match.round}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-white text-sm font-medium">
+                      {match.home_team.flag} {match.home_team.name}
+                    </span>
+                    <span className="bg-slate-700 text-slate-400 font-bold text-lg px-4 py-1 rounded-xl">
+                      ? : ?
+                    </span>
+                    <span className="text-white text-sm font-medium text-right">
+                      {match.away_team.name} {match.away_team.flag}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {(players ?? []).map(player => {
+                      const pick = picksMap[player.id]
+                      const hasPick = !!pick
+                      return (
+                        <div key={player.id} className="flex items-center gap-3 rounded-xl px-3 py-2 bg-slate-700/40">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white text-sm font-medium truncate">{player.username}</p>
+                          </div>
+                          <span className={`text-sm font-bold ${hasPick ? 'text-white' : 'text-slate-600'}`}>
+                            {hasPick ? `${pick.home_pick} : ${pick.away_pick}` : '—'}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── Fertige Spiele: Tipps mit Farben + Punkte ── */}
+      {displayFinished.length === 0 && startedMatches.length === 0 && upcomingToday.length === 0 && (
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center">
           <p className="text-4xl mb-3">⏳</p>
-          <p className="text-white font-semibold">Noch keine fertigen Spiele</p>
-          <p className="text-slate-400 text-sm mt-2">Hier siehst du nach Spielende die Tipps aller Spieler.</p>
+          <p className="text-white font-semibold">Noch keine Spiele gestartet</p>
+          <p className="text-slate-400 text-sm mt-2">Hier siehst du nach Anpfiff die Tipps aller Spieler.</p>
         </div>
-      ) : (
+      )}
+
+      {displayFinished.length > 0 && (
         <>
           <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-3">Letzte fertige Spiele</p>
-
-          {Object.entries(groups).map(([day, dayMatches]) => (
+          {Object.entries(finishedGroups).map(([day, dayMatches]) => (
             <div key={day} className="mb-8">
               <p className="text-slate-600 text-xs font-medium mb-3">{day}</p>
-
               {dayMatches.map(match => {
-                const matchPicks = picks.filter(p => p.match_id === match.id)
+                const matchPicks = finishedPicks.filter(p => p.match_id === match.id)
                 const picksMap = Object.fromEntries(matchPicks.map(p => [p.user_id, p]))
-
                 return (
                   <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4 mb-4">
                     <p className="text-slate-500 text-xs mb-2">{formatDate(match.match_date)} · {match.round}</p>
@@ -233,13 +289,11 @@ export default async function ResultsPage() {
                         {match.away_team.name} {match.away_team.flag}
                       </span>
                     </div>
-
                     <div className="flex flex-col gap-2">
                       {(players ?? []).map(player => {
                         const pick = picksMap[player.id]
                         const hasPick = !!pick
                         const { bg, text, label } = pickColor(pick?.points_earned ?? null, hasPick)
-
                         return (
                           <div key={player.id} className={`flex items-center gap-3 rounded-xl px-3 py-2 ${bg}`}>
                             <div className="flex-1 min-w-0">
