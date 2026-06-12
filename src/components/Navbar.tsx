@@ -4,7 +4,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-const VIDEO_ID = 'fYa_lusdAKk'
+const VIDEO_ID = 'WTJSt4wP2ME'
+const VOLUME = 20
 
 export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
   const pathname = usePathname()
@@ -21,11 +22,22 @@ export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
     )
   }
 
+  function handleLoad() {
+    setReady(true)
+    // kurz warten bis der Player initialisiert ist, dann laut setzen und abspielen
+    setTimeout(() => {
+      sendCommand('setVolume', [VOLUME])
+      sendCommand('playVideo')
+      setPlaying(true)
+    }, 1500)
+  }
+
   function toggleMusic() {
     if (!ready) return
     if (playing) {
       sendCommand('pauseVideo')
     } else {
+      sendCommand('setVolume', [VOLUME])
       sendCommand('playVideo')
     }
     setPlaying(p => !p)
@@ -51,9 +63,9 @@ export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
       {/* Unsichtbarer YouTube-Player */}
       <iframe
         ref={iframeRef}
-        src={`https://www.youtube.com/embed/${VIDEO_ID}?enablejsapi=1&autoplay=0&loop=1&playlist=${VIDEO_ID}`}
+        src={`https://www.youtube.com/embed/${VIDEO_ID}?enablejsapi=1&autoplay=1&loop=1&playlist=${VIDEO_ID}`}
         allow="autoplay"
-        onLoad={() => setReady(true)}
+        onLoad={handleLoad}
         style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px' }}
       />
 
