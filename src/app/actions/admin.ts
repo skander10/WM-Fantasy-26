@@ -70,6 +70,28 @@ export async function calculateTournamentPoints(): Promise<string | null> {
   return null
 }
 
+export async function addMatch(data: {
+  homeTeamId: number
+  awayTeamId: number
+  matchDate: string
+  round: string
+}): Promise<string | null> {
+  const supabase = await getAdminClient()
+  if (!supabase) return 'Keine Admin-Berechtigung.'
+  if (data.homeTeamId === data.awayTeamId) return 'Heim- und Auswärtsteam müssen unterschiedlich sein.'
+  const { error } = await supabase.from('matches').insert({
+    home_team_id: data.homeTeamId,
+    away_team_id: data.awayTeamId,
+    match_date: data.matchDate,
+    round: data.round.trim(),
+    status: 'scheduled',
+  })
+  if (error) return error.message
+  revalidatePath('/admin')
+  revalidatePath('/predict/matches')
+  return null
+}
+
 export async function saveMatchResult(
   matchId: number,
   homeScore: number,

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Check, X } from 'lucide-react'
-import { setUserPaid, saveMatchResult, setTournamentLocked, saveTournamentResults, calculateTournamentPoints } from '@/app/actions/admin'
+import { setUserPaid, saveMatchResult, setTournamentLocked, saveTournamentResults, calculateTournamentPoints, addMatch } from '@/app/actions/admin'
 
 type Player = {
   id: string
@@ -62,6 +62,13 @@ export function AdminClient({
   const [feedback, setFeedback] = useState<Record<string, string>>({})
   const [isPending, startTransition] = useTransition()
 
+  // Spiel hinzufügen
+  const [showAddMatch, setShowAddMatch] = useState(false)
+  const [newHome, setNewHome] = useState('')
+  const [newAway, setNewAway] = useState('')
+  const [newDate, setNewDate] = useState('')
+  const [newRound, setNewRound] = useState('')
+
   function showFeedback(key: string, msg: string) {
     setFeedback(prev => ({ ...prev, [key]: msg }))
     setTimeout(() => setFeedback(prev => { const n = { ...prev }; delete n[key]; return n }), 3000)
@@ -119,6 +126,86 @@ export function AdminClient({
       {/* Tab: Spiele */}
       {tab === 'matches' && (
         <div className="flex flex-col gap-4">
+
+          {/* Spiel hinzufügen */}
+          <button
+            onClick={() => setShowAddMatch(v => !v)}
+            className="w-full flex items-center justify-center gap-2 bg-slate-800 border border-dashed border-slate-600 hover:border-amber-400 text-slate-400 hover:text-amber-400 py-3 rounded-2xl text-sm font-medium transition-colors"
+          >
+            {showAddMatch ? '✕ Abbrechen' : '＋ Spiel hinzufügen'}
+          </button>
+
+          {showAddMatch && (
+            <div className="bg-slate-800 border border-amber-400/30 rounded-2xl p-4 flex flex-col gap-3">
+              <p className="text-white text-sm font-semibold">Neues Spiel</p>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-slate-500 text-xs mb-1">Heimteam</p>
+                  <select value={newHome} onChange={e => setNewHome(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 focus:border-amber-400 focus:outline-none rounded-lg text-white text-sm px-3 py-2">
+                    <option value="">— Heim —</option>
+                    {teams.map(t => <option key={t.id} value={t.id}>{t.flag} {t.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <p className="text-slate-500 text-xs mb-1">Auswärtsteam</p>
+                  <select value={newAway} onChange={e => setNewAway(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 focus:border-amber-400 focus:outline-none rounded-lg text-white text-sm px-3 py-2">
+                    <option value="">— Auswärts —</option>
+                    {teams.map(t => <option key={t.id} value={t.id}>{t.flag} {t.name}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-slate-500 text-xs mb-1">Datum & Uhrzeit (Berlin)</p>
+                  <input type="datetime-local" value={newDate} onChange={e => setNewDate(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 focus:border-amber-400 focus:outline-none rounded-lg text-white text-sm px-3 py-2" />
+                </div>
+                <div>
+                  <p className="text-slate-500 text-xs mb-1">Runde</p>
+                  <input type="text" value={newRound} onChange={e => setNewRound(e.target.value)}
+                    placeholder="z.B. Gruppe A"
+                    className="w-full bg-slate-700 border border-slate-600 focus:border-amber-400 focus:outline-none rounded-lg text-white text-sm px-3 py-2 placeholder-slate-500" />
+                </div>
+              </div>
+
+              {feedback['add_match'] && (
+                <p className={`text-xs text-center ${feedback['add_match'].includes('✅') ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {feedback['add_match']}
+                </p>
+              )}
+
+              <button
+                disabled={isPending || !newHome || !newAway || !newDate || !newRound}
+                onClick={() => {
+                  startTransition(async () => {
+                    // datetime-local liefert "YYYY-MM-DDTHH:mm" ohne TZ → als Berliner Zeit interpretieren
+                    const isoDate = new Date(newDate + ':00').toLocaleString('sv-SE', { timeZone: 'Europe/Berlin' }).replace(' ', 'T') + '+02:00'
+                    const err = await addMatch({
+                      homeTeamId: Number(newHome),
+                      awayTeamId: Number(newAway),
+                      matchDate: isoDate,
+                      round: newRound,
+                    })
+                    if (err) {
+                      showFeedback('add_match', err)
+                    } else {
+                      showFeedback('add_match', 'Spiel hinzugefügt ✅')
+                      setNewHome(''); setNewAway(''); setNewDate(''); setNewRound('')
+                      setShowAddMatch(false)
+                    }
+                  })
+                }}
+                className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-slate-900 font-bold py-2.5 rounded-xl text-sm transition-colors"
+              >
+                Spiel speichern
+              </button>
+            </div>
+          )}
+
           {matches.length === 0 && (
             <p className="text-slate-500 text-center py-10">Keine Spiele vorhanden.</p>
           )}
