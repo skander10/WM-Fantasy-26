@@ -24,12 +24,6 @@ export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
 
   function handleLoad() {
     setReady(true)
-    // kurz warten bis der Player initialisiert ist, dann laut setzen und abspielen
-    setTimeout(() => {
-      sendCommand('setVolume', [VOLUME])
-      sendCommand('playVideo')
-      setPlaying(true)
-    }, 1500)
   }
 
   function toggleMusic() {
@@ -63,7 +57,7 @@ export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
       {/* Unsichtbarer YouTube-Player */}
       <iframe
         ref={iframeRef}
-        src={`https://www.youtube.com/embed/${VIDEO_ID}?enablejsapi=1&autoplay=1&loop=1&playlist=${VIDEO_ID}`}
+        src={`https://www.youtube.com/embed/${VIDEO_ID}?enablejsapi=1&autoplay=0&loop=1&playlist=${VIDEO_ID}`}
         allow="autoplay"
         onLoad={handleLoad}
         style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px' }}
@@ -95,7 +89,7 @@ export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
               !ready ? 'opacity-40 cursor-not-allowed' : 'hover:scale-110'
             } ${playing ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
           >
-            {playing ? '🔊' : '🔇'}
+            {playing ? '♫' : '♪'}
           </button>
           <button onClick={logout} className="text-slate-400 hover:text-white text-sm ml-1">
             Logout
