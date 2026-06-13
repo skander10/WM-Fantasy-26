@@ -88,9 +88,9 @@ export default async function ResultsPage() {
     .from('matches')
     .select('id, match_date, round, home_team:home_team_id(name, flag), away_team:away_team_id(name, flag)')
     .eq('status', 'scheduled')
-    .gte('match_date', todayStart)
     .gt('match_date', now)
     .order('match_date', { ascending: true })
+    .limit(1)
 
   const upcomingToday = (rawUpcoming ?? []) as unknown as StartedMatch[]
 
