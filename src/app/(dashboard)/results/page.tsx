@@ -171,6 +171,8 @@ export default async function ResultsPage() {
           <div className="flex flex-col gap-3">
             {upcomingToday.map(match => {
               const tipped = participation.filter(p => p.match_id === match.id)
+              const tippedUsernames = new Set(tipped.map(p => p.username))
+              const notTipped = (players ?? []).filter(p => !tippedUsernames.has(p.username))
               const tippedCount = tipped.length
               return (
                 <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
@@ -194,15 +196,19 @@ export default async function ResultsPage() {
                       style={{ width: paidCount > 0 ? `${Math.round((tippedCount / paidCount) * 100)}%` : '0%' }}
                     />
                   </div>
-                  {tipped.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {tipped.map(p => (
-                        <span key={p.username} className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs px-2 py-0.5 rounded-lg font-medium">
-                          ✓ {p.username}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {tipped.map(p => (
+                      <span key={p.username} className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs px-2 py-0.5 rounded-lg font-medium">
+                        ✓ {p.username}
+                      </span>
+                    ))}
+                    {notTipped.map(p => (
+                      <span key={p.username} className="bg-red-500/15 border border-red-500/30 text-red-400 text-xs px-2 py-0.5 rounded-lg font-medium">
+                        ✗ {p.username}
+                      </span>
+                    ))}
+                  </div>
+                  {tipped.length === 0 && notTipped.length === 0 && (
                     <p className="text-slate-600 text-xs">Noch niemand hat getippt</p>
                   )}
                 </div>
