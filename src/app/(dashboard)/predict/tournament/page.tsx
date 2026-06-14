@@ -29,6 +29,18 @@ export default async function TournamentPage() {
     .eq("user_id", user!.id)
     .maybeSingle();
 
+  // Wer hat Turnier-Tipps abgegeben?
+  const { data: paidPlayers } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("paid", true)
+    .order("username");
+
+  const { data: submitted } = await supabase.rpc("get_tournament_participation");
+  const submittedSet = new Set((submitted ?? []).map((r: { username: string }) => r.username));
+  const notSubmitted = (paidPlayers ?? []).filter(p => !submittedSet.has(p.username));
+  const submittedList = (paidPlayers ?? []).filter(p => submittedSet.has(p.username));
+
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
       <div className="flex items-center justify-between mb-2">
@@ -43,6 +55,37 @@ export default async function TournamentPage() {
         Einmal abgeben — danach nicht mehr änderbar. Punkte werden am Ende
         vergeben.
       </p>
+
+      {/* Teilnahme-Übersicht */}
+      {!globalLocked && (paidPlayers ?? []).length > 0 && (
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-white text-sm font-semibold">Turnier-Tipps Übersicht</p>
+            <span className="text-xs text-slate-400">
+              {submittedList.length}/{(paidPlayers ?? []).length} abgegeben
+            </span>
+          </div>
+          <div className="w-full bg-slate-700 rounded-full h-1.5 mb-3">
+            <div
+              className="bg-amber-400 h-1.5 rounded-full"
+              style={{ width: (paidPlayers ?? []).length > 0 ? `${Math.round((submittedList.length / (paidPlayers ?? []).length) * 100)}%` : '0%' }}
+            />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {submittedList.map(p => (
+              <span key={p.username} className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs px-2 py-0.5 rounded-lg font-medium">
+                ✓ {p.username}
+              </span>
+            ))}
+            {notSubmitted.map(p => (
+              <span key={p.username} className="bg-red-500/15 border border-red-500/30 text-red-400 text-xs px-2 py-0.5 rounded-lg font-medium">
+                ✗ {p.username}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
 
       {/* Punkte-Übersicht */}
       <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 mb-6 grid grid-cols-3 gap-2 text-xs text-center">
