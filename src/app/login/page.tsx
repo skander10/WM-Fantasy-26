@@ -70,13 +70,6 @@ export default function LoginPage() {
 
         </form>
 
-        {/* Link zur Registrierung */}
-        <p className="text-center text-slate-500 text-sm mt-6">
-          Noch kein Konto?{' '}
-          <Link href="/register" className="text-amber-400 hover:text-amber-300 font-medium">
-            Jetzt registrieren
-          </Link>
-        </p>
 
       </div>
     </main>
