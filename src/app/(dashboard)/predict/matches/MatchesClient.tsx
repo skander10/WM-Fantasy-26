@@ -101,8 +101,8 @@ export function MatchesClient({
 
   return (
     <div style={bgStyle} className="min-h-screen">
-    <div className="min-h-screen bg-slate-900/70">
-    <div className="max-w-lg mx-auto px-4 pb-28 pt-6">
+      <div className="min-h-screen bg-slate-900/70">
+        <div className="max-w-lg mx-auto px-4 pb-28 pt-6">
       <h1 className="text-xl font-bold text-white mb-6">Spiele tippen</h1>
 
       {Object.entries(groups).map(([date, dayMatches]) => (
@@ -243,8 +243,8 @@ export function MatchesClient({
           </button>
         </div>
       </div>
-    </div>
-    </div>
+        </div>
+      </div>
     </div>
   )
 }
