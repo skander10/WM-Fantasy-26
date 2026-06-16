@@ -83,7 +83,7 @@ export function MatchesClient({
   const bgStyle = {
     backgroundImage: 'url(https://www.watson.de/imgdb/f333/Z1200,1200/6682794550975593)',
     backgroundSize: 'cover',
-    backgroundPosition: 'center',
+    backgroundPosition: 'center 80px',
     backgroundAttachment: 'fixed',
   }
 
