@@ -80,17 +80,28 @@ export function MatchesClient({
     })
   }
 
+  const bgStyle = {
+    backgroundImage: 'url(https://www.watson.de/imgdb/f333/Z1200,1200/6682794550975593)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
+  }
+
   if (matches.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-slate-500 px-6 text-center">
-        <p className="text-4xl mb-4">⚽</p>
-        <p className="text-base font-medium text-slate-400">Noch keine Spiele</p>
-        <p className="text-sm mt-1">Der Admin fügt die Spiele bald hinzu.</p>
+      <div style={bgStyle} className="min-h-screen">
+        <div className="min-h-screen bg-slate-900/75 flex flex-col items-center justify-center py-24 text-slate-500 px-6 text-center">
+          <p className="text-4xl mb-4">⚽</p>
+          <p className="text-base font-medium text-slate-400">Noch keine Spiele</p>
+          <p className="text-sm mt-1">Der Admin fügt die Spiele bald hinzu.</p>
+        </div>
       </div>
     )
   }
 
   return (
+    <div style={bgStyle} className="min-h-screen">
+    <div className="min-h-screen bg-slate-900/70">
     <div className="max-w-lg mx-auto px-4 pb-28 pt-6">
       <h1 className="text-xl font-bold text-white mb-6">Spiele tippen</h1>
 
@@ -232,6 +243,8 @@ export function MatchesClient({
           </button>
         </div>
       </div>
+    </div>
+    </div>
     </div>
   )
 }
