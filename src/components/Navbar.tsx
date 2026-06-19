@@ -53,7 +53,7 @@ export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
   ]
 
   return (
-    <nav className="bg-slate-800 border-b border-slate-700 px-4 py-3">
+    <nav className="relative z-50 bg-slate-800 border-b border-slate-700 px-4 py-3">
       {/* Unsichtbarer YouTube-Player */}
       <iframe
         ref={iframeRef}
