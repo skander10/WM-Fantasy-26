@@ -80,17 +80,14 @@ export function MatchesClient({
     })
   }
 
-  const bgStyle = {
-    backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqTQUQ-dMIRqVE6pv8Inc6DJ69I8-qGmeGiQ&s)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'center top',
-    backgroundAttachment: 'fixed',
-  }
+  const BG_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqTQUQ-dMIRqVE6pv8Inc6DJ69I8-qGmeGiQ&s'
 
   if (matches.length === 0) {
     return (
-      <div style={bgStyle} className="min-h-screen">
-        <div className="min-h-screen bg-slate-900/75 flex flex-col items-center justify-center py-24 text-slate-500 px-6 text-center">
+      <div className="relative">
+        <div className="fixed inset-0 z-0" style={{ backgroundImage: `url(${BG_URL})`, backgroundSize: 'cover', backgroundPosition: 'center top' }} />
+        <div className="fixed inset-0 z-0 bg-slate-900/40" />
+        <div className="relative z-10 flex flex-col items-center justify-center py-24 text-slate-500 px-6 text-center min-h-screen">
           <p className="text-4xl mb-4">⚽</p>
           <p className="text-base font-medium text-slate-400">Noch keine Spiele</p>
           <p className="text-sm mt-1">Der Admin fügt die Spiele bald hinzu.</p>
@@ -100,9 +97,10 @@ export function MatchesClient({
   }
 
   return (
-    <div style={bgStyle} className="min-h-screen">
-      <div className="min-h-screen bg-slate-900/40">
-        <div className="max-w-lg mx-auto px-4 pb-28 pt-6">
+    <div className="relative">
+      <div className="fixed inset-0 z-0" style={{ backgroundImage: `url(${BG_URL})`, backgroundSize: 'cover', backgroundPosition: 'center top' }} />
+      <div className="fixed inset-0 z-0 bg-slate-900/40" />
+      <div className="relative z-10 max-w-lg mx-auto px-4 pb-28 pt-6">
       <h1 className="text-xl font-bold text-white mb-6">Spiele tippen</h1>
 
       {Object.entries(groups).map(([date, dayMatches]) => (
@@ -243,7 +241,6 @@ export function MatchesClient({
           </button>
         </div>
       </div>
-        </div>
       </div>
     </div>
   )
