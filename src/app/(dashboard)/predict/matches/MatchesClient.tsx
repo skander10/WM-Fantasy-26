@@ -41,16 +41,24 @@ export function MatchesClient({
 
   const isLocked = (matchDate: string) => new Date(matchDate) <= new Date()
 
+  function isTunisiaTeam(team: Team) {
+    const n = team.name.toLowerCase()
+    return n.includes('tun') || n.includes('tunisi') || n.includes('tunesien') || team.flag === '🇹🇳'
+  }
+
+  function isJapanTeam(team: Team) {
+    const n = team.name.toLowerCase()
+    return n.includes('japan') || n.includes('jap') || team.flag === '🇯🇵'
+  }
+
   function isTunisiaMatch(match: Match) {
-    const names = [match.home_team.name.toLowerCase(), match.away_team.name.toLowerCase()]
-    return names.some(n => n.includes('tunisi') || n.includes('tunesien')) &&
-           names.some(n => n.includes('japan'))
+    return (isTunisiaTeam(match.home_team) && isJapanTeam(match.away_team)) ||
+           (isTunisiaTeam(match.away_team) && isJapanTeam(match.home_team))
   }
 
   function violatesTunisiaRule(match: Match, home: number, away: number) {
     if (!isTunisiaMatch(match)) return false
-    const tunisiaIsHome = match.home_team.name.toLowerCase().includes('tunisi') ||
-                          match.home_team.name.toLowerCase().includes('tunesien')
+    const tunisiaIsHome = isTunisiaTeam(match.home_team)
     const japanGoals = tunisiaIsHome ? away : home
     const tunisiaGoals = tunisiaIsHome ? home : away
     return japanGoals > tunisiaGoals && (japanGoals - tunisiaGoals) > 1
