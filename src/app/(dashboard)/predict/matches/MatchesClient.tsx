@@ -37,6 +37,7 @@ export function MatchesClient({
   )
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [showTunisiaPopup, setShowTunisiaPopup] = useState(false)
+  const [popupLang, setPopupLang] = useState<'de' | 'en'>('de')
   const [isPending, startTransition] = useTransition()
 
   const isLocked = (matchDate: string) => new Date(matchDate) <= new Date()
@@ -142,26 +143,56 @@ export function MatchesClient({
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-5">
           <div className="absolute inset-0 bg-black/70" onClick={() => setShowTunisiaPopup(false)} />
           <div className="relative bg-slate-900 border border-red-500/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl">
+
+            {/* Lang Toggle */}
+            <div className="flex justify-center mb-4">
+              <div className="flex bg-slate-800 border border-slate-700 rounded-xl p-1 gap-1">
+                <button onClick={() => setPopupLang('de')}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${popupLang === 'de' ? 'bg-amber-400 text-slate-900' : 'text-slate-400 hover:text-white'}`}>
+                  🇩🇪 DE
+                </button>
+                <button onClick={() => setPopupLang('en')}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${popupLang === 'en' ? 'bg-amber-400 text-slate-900' : 'text-slate-400 hover:text-white'}`}>
+                  🇬🇧 EN
+                </button>
+              </div>
+            </div>
+
             <div className="text-center mb-5">
               <p className="text-4xl mb-3">🇹🇳</p>
-              <p className="text-white font-bold text-base leading-relaxed mb-3">
-                Hör auf, Tunesien ist doch nicht so schwach! Mit bisschen Hoffnung können wir das noch zsam packen.. Scheiß auf die 5/10 Punkte diesmal, das gilt für alle 🔥
-              </p>
-              <p className="text-red-400 font-semibold text-sm mb-3">
-                1% Chance, 99% Glaube ❤️
-              </p>
-              <p className="text-slate-300 text-sm leading-relaxed mb-4">
-                🐭 Wenn du nicht an uns glaubst, dann tipp wenigstens nur 1 Tor Unterschied gegen uns — wäre aber beim Tipps-Vergleich so peinlich, du Verräter!
-              </p>
+
+              {popupLang === 'de' ? (<>
+                <p className="text-white font-bold text-base leading-relaxed mb-3">
+                  Hör auf, Tunesien ist doch nicht so schwach! Mit bisschen Hoffnung können wir das noch zsam packen.. Scheiß auf die 5/10 Punkte diesmal, das gilt für alle 🔥
+                </p>
+                <p className="text-red-400 font-semibold text-sm mb-3">
+                  1% Chance, 99% Glaube ❤️
+                </p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                  🐭 Wenn du nicht an uns glaubst, dann tipp wenigstens nur 1 Tor Unterschied gegen uns — wäre aber beim Tipps-Vergleich so peinlich, du Verräter!
+                </p>
+              </>) : (<>
+                <p className="text-white font-bold text-base leading-relaxed mb-3">
+                  Stop it, Tunisia isn't that weak! With a bit of hope we can still pull this off.. Forget the 5/10 points this time, this goes for everyone 🔥
+                </p>
+                <p className="text-red-400 font-semibold text-sm mb-3">
+                  1% Chance, 99% Belief ❤️
+                </p>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                  🐭 If you don't believe in us, at least tip only 1 goal difference against us — it would be so embarrassing on the comparison page, you traitor!
+                </p>
+              </>)}
+
               <p className="text-amber-400 font-bold text-lg" dir="rtl">
                 نموت نموت و يحيا الوطن
               </p>
             </div>
+
             <button
               onClick={() => setShowTunisiaPopup(false)}
               className="w-full bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-2xl text-sm transition-colors"
             >
-              Ok ok, ich ändere meinen Tipp 😅
+              {popupLang === 'de' ? 'Ok ok, ich ändere meinen Tipp 😅' : 'Ok ok, I\'ll change my tip 😅'}
             </button>
           </div>
         </div>
