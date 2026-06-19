@@ -36,9 +36,25 @@ export function MatchesClient({
     () => new Set(Object.keys(picksMap).map(Number))
   )
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [showTunisiaPopup, setShowTunisiaPopup] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const isLocked = (matchDate: string) => new Date(matchDate) <= new Date()
+
+  function isTunisiaMatch(match: Match) {
+    const names = [match.home_team.name.toLowerCase(), match.away_team.name.toLowerCase()]
+    return names.some(n => n.includes('tunisi') || n.includes('tunesien')) &&
+           names.some(n => n.includes('japan'))
+  }
+
+  function violatesTunisiaRule(match: Match, home: number, away: number) {
+    if (!isTunisiaMatch(match)) return false
+    const tunisiaIsHome = match.home_team.name.toLowerCase().includes('tunisi') ||
+                          match.home_team.name.toLowerCase().includes('tunesien')
+    const japanGoals = tunisiaIsHome ? away : home
+    const tunisiaGoals = tunisiaIsHome ? home : away
+    return japanGoals > tunisiaGoals && (japanGoals - tunisiaGoals) > 1
+  }
 
   // Matches nach Datum gruppieren
   const groups: Record<string, Match[]> = {}
@@ -52,6 +68,18 @@ export function MatchesClient({
   }
 
   function handleSave() {
+    // Tunisia-Regel prüfen
+    for (const m of matches.filter(m => !isLocked(m.match_date))) {
+      const s = scores[m.id]
+      if (!s || s.home === '' || s.away === '') continue
+      const home = Number(s.home)
+      const away = Number(s.away)
+      if (!isNaN(home) && !isNaN(away) && violatesTunisiaRule(m, home, away)) {
+        setShowTunisiaPopup(true)
+        return
+      }
+    }
+
     const picks = matches
       .filter(m => !isLocked(m.match_date))
       .flatMap(m => {
@@ -100,6 +128,37 @@ export function MatchesClient({
     <div className="relative">
       <div className="fixed inset-0 z-0" style={{ backgroundImage: `url(${BG_URL})`, backgroundSize: 'cover', backgroundPosition: 'center top' }} />
       <div className="fixed inset-0 z-0 bg-slate-900/40" />
+
+      {/* Tunisia Popup */}
+      {showTunisiaPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-5">
+          <div className="absolute inset-0 bg-black/70" onClick={() => setShowTunisiaPopup(false)} />
+          <div className="relative bg-slate-900 border border-red-500/40 rounded-3xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="text-center mb-5">
+              <p className="text-4xl mb-3">🇹🇳</p>
+              <p className="text-white font-bold text-base leading-relaxed mb-3">
+                Hör auf, Tunesien ist doch nicht so schwach! Mit bisschen Hoffnung können wir das noch zsam packen.. Scheiß auf die 5/10 Punkte diesmal, das gilt für alle 🔥
+              </p>
+              <p className="text-red-400 font-semibold text-sm mb-3">
+                1% Chance, 99% Glaube ❤️
+              </p>
+              <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                🐭 Wenn du nicht an uns glaubst, dann tipp wenigstens nur 1 Tor Unterschied gegen uns — wäre aber beim Tipps-Vergleich so peinlich, du Verräter!
+              </p>
+              <p className="text-amber-400 font-bold text-lg" dir="rtl">
+                نموت نموت و يحيا الوطن
+              </p>
+            </div>
+            <button
+              onClick={() => setShowTunisiaPopup(false)}
+              className="w-full bg-red-500 hover:bg-red-400 text-white font-bold py-3 rounded-2xl text-sm transition-colors"
+            >
+              Ok ok, ich ändere meinen Tipp 😅
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="relative z-10 max-w-lg mx-auto px-4 pb-28 pt-6">
       <h1 className="text-xl font-bold text-white mb-6">Spiele tippen</h1>
 
