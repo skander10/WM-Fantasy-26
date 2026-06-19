@@ -81,9 +81,9 @@ export function MatchesClient({
   }
 
   const bgStyle = {
-    backgroundImage: 'url(https://www.watson.de/imgdb/f333/Z1200,1200/6682794550975593)',
+    backgroundImage: 'url(https://c8.alamy.com/comp/HWH3PK/tunisia-tunis-avenue-habib-bourguiba-elevated-view-towards-place-du-HWH3PK.jpg)',
     backgroundSize: 'cover',
-    backgroundPosition: 'center 80px',
+    backgroundPosition: 'center top',
     backgroundAttachment: 'fixed',
   }
 
