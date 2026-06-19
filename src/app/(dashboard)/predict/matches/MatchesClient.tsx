@@ -81,7 +81,7 @@ export function MatchesClient({
   }
 
   const bgStyle = {
-    backgroundImage: 'url(https://pbs.twimg.com/media/G3J0KmdWsAASu0g.jpg)',
+    backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqTQUQ-dMIRqVE6pv8Inc6DJ69I8-qGmeGiQ&s)',
     backgroundSize: 'cover',
     backgroundPosition: 'center top',
     backgroundAttachment: 'fixed',
