@@ -148,17 +148,26 @@ export default async function ResultsPage() {
 
   const finishedGroups = groupByDate(displayFinished)
 
+  const bgStyle = {
+    backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRolxGVOH7Kb9S4rJvmg_fNuBKE3l-CmVD6cw&s)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center top',
+    backgroundAttachment: 'fixed',
+  }
+
   return (
+    <div style={bgStyle} className="min-h-screen">
+    <div className="min-h-screen bg-slate-900/40">
     <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
       <h1 className="text-xl font-bold text-white mb-6">Tipps-Vergleich</h1>
 
       {/* Stats Banner */}
       <div className="grid grid-cols-2 gap-3 mb-6">
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-center">
+        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-4 py-3 text-center">
           <p className="text-2xl font-bold text-amber-400">{totalUsers ?? 0}</p>
           <p className="text-slate-400 text-xs mt-1">Registrierte Spieler</p>
         </div>
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl px-4 py-3 text-center">
+        <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-4 py-3 text-center">
           <p className="text-2xl font-bold text-emerald-400">{paidCount}</p>
           <p className="text-slate-400 text-xs mt-1">Freigeschaltet</p>
         </div>
@@ -175,7 +184,7 @@ export default async function ResultsPage() {
               const notTipped = (players ?? []).filter(p => !tippedUsernames.has(p.username))
               const tippedCount = tipped.length
               return (
-                <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                <div key={match.id} className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-slate-500 text-xs mb-1">{formatTime(match.match_date)} · {match.round}</p>
@@ -227,7 +236,7 @@ export default async function ResultsPage() {
               const matchPicks = startedPicks.filter(p => p.match_id === match.id)
               const picksMap = Object.fromEntries(matchPicks.map(p => [p.user_id, p]))
               return (
-                <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                <div key={match.id} className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4">
                   <p className="text-slate-500 text-xs mb-2">{formatDate(match.match_date)} · {match.round}</p>
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-white text-sm font-medium">
@@ -282,7 +291,7 @@ export default async function ResultsPage() {
                 const matchPicks = finishedPicks.filter(p => p.match_id === match.id)
                 const picksMap = Object.fromEntries(matchPicks.map(p => [p.user_id, p]))
                 return (
-                  <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4 mb-4">
+                  <div key={match.id} className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4 mb-4">
                     <p className="text-slate-500 text-xs mb-2">{formatDate(match.match_date)} · {match.round}</p>
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-white text-sm font-medium">
@@ -324,6 +333,8 @@ export default async function ResultsPage() {
           ))}
         </>
       )}
+    </div>
+    </div>
     </div>
   )
 }
