@@ -23,8 +23,8 @@ export default async function RankingPage() {
 
   return (
     <div style={bgStyle} className="min-h-screen">
-    <div className="min-h-screen bg-slate-900/70">
-    <div className="max-w-lg mx-auto px-4 py-6 pb-24">
+      <div className="min-h-screen bg-slate-900/70">
+        <div className="max-w-lg mx-auto px-4 py-6 pb-24">
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
@@ -125,8 +125,8 @@ export default async function RankingPage() {
         </p>
       )}
 
-    </div>
-    </div>
+        </div>
+      </div>
     </div>
   )
 }
