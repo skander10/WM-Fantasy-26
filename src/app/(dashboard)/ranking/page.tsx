@@ -14,7 +14,16 @@ export default async function RankingPage() {
 
   const medals = ['🥇', '🥈', '🥉']
 
+  const bgStyle = {
+    backgroundImage: 'url(https://www.afrik-foot.com/thumbor/NLEzF_qqL2ejzGEX-mhf5Rg5Z3o=/2560x1707/smart/filters:format(webp)/https%3A%2F%2Fmedia.afrik-foot.com%2Fmain%2F2025%2F11%2FHannibal-Mejbri-scaled.jpg)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center top',
+    backgroundAttachment: 'fixed',
+  }
+
   return (
+    <div style={bgStyle} className="min-h-screen">
+    <div className="min-h-screen bg-slate-900/70">
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
 
       {/* Header */}
@@ -116,6 +125,8 @@ export default async function RankingPage() {
         </p>
       )}
 
+    </div>
+    </div>
     </div>
   )
 }
