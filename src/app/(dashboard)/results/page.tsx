@@ -149,7 +149,7 @@ export default async function ResultsPage() {
   const finishedGroups = groupByDate(displayFinished)
 
   const bgStyle = {
-    backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRolxGVOH7Kb9S4rJvmg_fNuBKE3l-CmVD6cw&s)',
+    backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWaRYLyLGho8y_O76vYLbpSmBx9IphGA_7hg&s)',
     backgroundSize: 'cover',
     backgroundPosition: 'center top',
     backgroundAttachment: 'fixed',
