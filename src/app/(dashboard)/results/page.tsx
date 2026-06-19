@@ -157,8 +157,8 @@ export default async function ResultsPage() {
 
   return (
     <div style={bgStyle} className="min-h-screen">
-    <div className="min-h-screen bg-slate-900/40">
-    <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+      <div className="min-h-screen bg-slate-900/40">
+        <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
       <h1 className="text-xl font-bold text-white mb-6">Tipps-Vergleich</h1>
 
       {/* Stats Banner */}
@@ -333,8 +333,8 @@ export default async function ResultsPage() {
           ))}
         </>
       )}
-    </div>
-    </div>
+        </div>
+      </div>
     </div>
   )
 }
