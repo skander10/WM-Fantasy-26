@@ -81,7 +81,7 @@ export function MatchesClient({
   }
 
   const bgStyle = {
-    backgroundImage: 'url(https://c8.alamy.com/comp/HWH3PK/tunisia-tunis-avenue-habib-bourguiba-elevated-view-towards-place-du-HWH3PK.jpg)',
+    backgroundImage: 'url(https://pbs.twimg.com/media/G3J0KmdWsAASu0g.jpg)',
     backgroundSize: 'cover',
     backgroundPosition: 'center top',
     backgroundAttachment: 'fixed',
@@ -101,7 +101,7 @@ export function MatchesClient({
 
   return (
     <div style={bgStyle} className="min-h-screen">
-      <div className="min-h-screen bg-slate-900/70">
+      <div className="min-h-screen bg-slate-900/40">
         <div className="max-w-lg mx-auto px-4 pb-28 pt-6">
       <h1 className="text-xl font-bold text-white mb-6">Spiele tippen</h1>
 
@@ -122,7 +122,7 @@ export function MatchesClient({
               return (
                 <div
                   key={match.id}
-                  className={`bg-slate-800 border rounded-2xl px-4 py-3 transition-colors ${
+                  className={`bg-slate-900/50 backdrop-blur-sm border rounded-2xl px-4 py-3 transition-colors ${
                     locked
                       ? 'border-slate-700/50 opacity-70'
                       : saved
