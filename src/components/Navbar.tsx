@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-const VIDEO_ID = 'nwHY2mhtcuE'
+const VIDEO_ID = 'qaF0oRM4-XE'
 const VOLUME = 20
 
 export default function Navbar({ isAdmin }: { isAdmin?: boolean }) {
