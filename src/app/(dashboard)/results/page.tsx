@@ -80,10 +80,6 @@ export default async function ResultsPage() {
   const { data: participationData } = await supabase.rpc('get_today_participation')
   const participation = (participationData ?? []) as ParticipationRow[]
 
-  // Heute noch nicht gestartete Spiele (für Teilnahme-Anzeige)
-  const nowBerlin = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Berlin' })
-  const todayStart = new Date(nowBerlin + 'T00:00:00+02:00').toISOString()
-
   const { data: rawUpcoming } = await supabase
     .from('matches')
     .select('id, match_date, round, home_team:home_team_id(name, flag), away_team:away_team_id(name, flag)')
@@ -152,7 +148,7 @@ export default async function ResultsPage() {
     <div className="relative">
       {/* Hintergrund fix auf Viewport */}
       <div className="fixed inset-0 z-0" style={{
-        backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRolxGVOH7Kb9S4rJvmg_fNuBKE3l-CmVD6cw&s)',
+        backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3Rk_iP0A3B_ujlFSbKJpKwHOPZGWMQNx7CQ&s)',
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
       }} />

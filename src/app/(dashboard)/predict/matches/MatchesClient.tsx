@@ -80,7 +80,7 @@ export function MatchesClient({
     })
   }
 
-  const BG_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqTQUQ-dMIRqVE6pv8Inc6DJ69I8-qGmeGiQ&s'
+  const BG_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsu2SSsf7bT1c6sy7CUuHqnMSPFQLeS9WeiA&s'
 
   if (matches.length === 0) {
     return (

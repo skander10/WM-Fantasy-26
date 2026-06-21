@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { Trophy } from 'lucide-react'
 import { Avatar } from '@/components/Avatar'
 
-const BG_URL = 'https://pbs.twimg.com/media/G91YvxvWAAAZZBa.jpg'
-
 export default async function RankingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -18,15 +16,7 @@ export default async function RankingPage() {
 
   return (
     <div className="relative">
-      {/* Fixierter Hintergrund */}
-      <div className="fixed inset-0 z-0" style={{
-        backgroundImage: `url(${BG_URL})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center top',
-      }} />
-      <div className="fixed inset-0 z-0 bg-slate-900/40" />
-
-      <div className="relative z-10 max-w-lg mx-auto px-4 py-6 pb-24">
+      <div className="max-w-lg mx-auto px-4 py-6 pb-24">
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
