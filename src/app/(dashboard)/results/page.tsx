@@ -146,8 +146,13 @@ export default async function ResultsPage() {
 
   return (
     <div className="relative">
-      {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 py-6 pb-24">
+      <div className="fixed inset-0 z-0" style={{
+        backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwxM9uxk6uAdPnFi9QV2ZM_FXnSvJnUGRgFRihfu0ebxF7oj0cvwp-rEz_&s=10)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+      }} />
+      <div className="fixed inset-0 z-0 bg-slate-900/40" />
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-6 pb-24">
       <h1 className="text-xl font-bold text-white mb-6">Tipps-Vergleich</h1>
 
       {/* Stats Banner */}
