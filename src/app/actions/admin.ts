@@ -92,6 +92,16 @@ export async function addMatch(data: {
   return null
 }
 
+export async function updateMatchDate(matchId: number, matchDate: string): Promise<string | null> {
+  const supabase = await getAdminClient()
+  if (!supabase) return 'Keine Admin-Berechtigung.'
+  const { error } = await supabase.from('matches').update({ match_date: matchDate }).eq('id', matchId)
+  if (error) return error.message
+  revalidatePath('/admin')
+  revalidatePath('/predict/matches')
+  return null
+}
+
 export async function saveMatchResult(
   matchId: number,
   homeScore: number,

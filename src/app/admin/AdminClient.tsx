@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Check, X } from 'lucide-react'
-import { setUserPaid, saveMatchResult, setTournamentLocked, saveTournamentResults, calculateTournamentPoints, addMatch } from '@/app/actions/admin'
+import { setUserPaid, saveMatchResult, setTournamentLocked, saveTournamentResults, calculateTournamentPoints, addMatch, updateMatchDate } from '@/app/actions/admin'
 
 type Player = {
   id: string
@@ -59,6 +59,7 @@ export function AdminClient({
     tournamentResults?.tunisia_advances === null ? '' : tournamentResults?.tunisia_advances ? 'yes' : 'no'
   )
   const [scores, setScores] = useState<Record<number, { home: string; away: string }>>({})
+  const [editingDate, setEditingDate] = useState<Record<number, string>>({})
   const [feedback, setFeedback] = useState<Record<string, string>>({})
   const [isPending, startTransition] = useTransition()
 
@@ -211,7 +212,49 @@ export function AdminClient({
           )}
           {matches.map(match => (
             <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
-              <p className="text-slate-500 text-xs mb-2" suppressHydrationWarning>{time(match.match_date)} · {match.round}</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-slate-500 text-xs" suppressHydrationWarning>{time(match.match_date)} · {match.round}</p>
+                <button
+                  onClick={() => setEditingDate(prev => ({
+                    ...prev,
+                    [match.id]: new Date(match.match_date).toLocaleString('sv-SE', { timeZone: 'Europe/Berlin' }).slice(0, 16)
+                  }))}
+                  className="text-slate-500 hover:text-amber-400 text-xs transition-colors"
+                >
+                  ✏️
+                </button>
+              </div>
+
+              {editingDate[match.id] !== undefined && (
+                <div className="flex items-center gap-2 mb-3">
+                  <input
+                    type="datetime-local"
+                    value={editingDate[match.id]}
+                    onChange={e => setEditingDate(prev => ({ ...prev, [match.id]: e.target.value }))}
+                    className="flex-1 bg-slate-700 border border-slate-600 focus:border-amber-400 focus:outline-none rounded-lg text-white text-xs px-2 py-1.5"
+                  />
+                  <button
+                    disabled={isPending}
+                    onClick={() => {
+                      startTransition(async () => {
+                        const iso = new Date(editingDate[match.id] + ':00').toLocaleString('sv-SE', { timeZone: 'Europe/Berlin' }).replace(' ', 'T') + '+02:00'
+                        const err = await updateMatchDate(match.id, iso)
+                        if (err) { showFeedback(`m${match.id}`, err) }
+                        else { showFeedback(`m${match.id}`, 'Datum gespeichert ✅'); setEditingDate(prev => { const n = { ...prev }; delete n[match.id]; return n }) }
+                      })
+                    }}
+                    className="bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-slate-900 font-semibold text-xs px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    OK
+                  </button>
+                  <button
+                    onClick={() => setEditingDate(prev => { const n = { ...prev }; delete n[match.id]; return n })}
+                    className="text-slate-500 hover:text-white text-xs px-2 py-1.5"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
 
               {/* Teams */}
               <div className="flex items-center justify-between mb-3">
