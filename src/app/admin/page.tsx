@@ -48,10 +48,6 @@ export default async function AdminPage() {
     .select('*')
     .maybeSingle()
 
-  const { data: tournamentPicks } = await supabase
-    .from('tournament_picks')
-    .select('user_id, champion_team_id, second_team_id, third_team_id, top_scorer, top_assist_player, best_player, tunisia_advances, is_locked')
-
   return (
     <div className="min-h-screen flex flex-col bg-slate-900">
       <Navbar isAdmin />
@@ -62,7 +58,6 @@ export default async function AdminPage() {
         oneChangeMode={oneChangeSetting?.value === 'true'}
         teams={(teams ?? []) as any}
         tournamentResults={tournamentResults ?? null}
-        tournamentPicks={(tournamentPicks ?? []) as any}
       />
     </div>
   )
