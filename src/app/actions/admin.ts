@@ -26,10 +26,8 @@ export async function setOneChangeMode(enabled: boolean): Promise<string | null>
   if (!supabase) return 'Keine Admin-Berechtigung.'
   const { error } = await supabase
     .from('app_settings')
-    .upsert(
-      { key: 'tournament_one_change_mode', value: enabled ? 'true' : 'false', updated_at: new Date().toISOString() },
-      { onConflict: 'key' }
-    )
+    .update({ value: enabled ? 'true' : 'false', updated_at: new Date().toISOString() })
+    .eq('key', 'tournament_one_change_mode')
   if (error) return error.message
   revalidatePath('/admin')
   revalidatePath('/predict/tournament')

@@ -26,9 +26,10 @@ export default async function TournamentPage() {
   const { data: usedSetting } = await supabase
     .from("app_settings")
     .select("value")
-    .eq("key", `change_used_${user!.id}`)
+    .eq("key", "tournament_change_used_users")
     .maybeSingle();
-  const changeUsed = usedSetting?.value === "true";
+  const usedUsers: string[] = JSON.parse(usedSetting?.value ?? "[]");
+  const changeUsed = usedUsers.includes(user!.id);
 
   const { data: teams } = await supabase
     .from("teams")

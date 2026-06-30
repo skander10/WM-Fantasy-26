@@ -61,13 +61,14 @@ export async function saveTournamentPick(input: TournamentPickInput): Promise<st
     .maybeSingle()
 
   if (oneChangeSetting?.value === 'true') {
-    // Bereits verwendet?
+    // Bereits verwendet? (JSON-Array mit User-IDs)
     const { data: usedSetting } = await supabase
       .from('app_settings')
       .select('value')
-      .eq('key', `change_used_${user.id}`)
+      .eq('key', 'tournament_change_used_users')
       .maybeSingle()
-    if (usedSetting?.value === 'true') return 'Du hast deine eine Änderung bereits verwendet.'
+    const usedUsers: string[] = JSON.parse(usedSetting?.value ?? '[]')
+    if (usedUsers.includes(user.id)) return 'Du hast deine eine Änderung bereits verwendet.'
 
     // Bestehenden Tipp laden
     const { data: existing } = await supabase
@@ -106,10 +107,11 @@ export async function saveTournamentPick(input: TournamentPickInput): Promise<st
       .eq('user_id', user.id)
     if (error) return `Fehler: ${error.message}`
 
-    // Änderung als verbraucht markieren
+    // User-ID in JSON-Array eintragen
     await supabase
       .from('app_settings')
-      .upsert({ key: `change_used_${user.id}`, value: 'true' }, { onConflict: 'key' })
+      .update({ value: JSON.stringify([...usedUsers, user.id]) })
+      .eq('key', 'tournament_change_used_users')
 
     return null
   }
