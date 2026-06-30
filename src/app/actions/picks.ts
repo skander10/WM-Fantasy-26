@@ -62,22 +62,14 @@ export async function saveTournamentPick(input: TournamentPickInput): Promise<st
     .maybeSingle()
 
   if (oneChangeSetting?.value === 'true') {
-    // Bereits verwendet? (JSON-Array mit User-IDs)
-    const { data: usedSetting } = await supabase
-      .from('app_settings')
-      .select('value')
-      .eq('key', 'tournament_change_used_users')
-      .maybeSingle()
-    const usedUsers: string[] = JSON.parse(usedSetting?.value ?? '[]')
-    if (usedUsers.includes(user.id)) return 'Du hast deine eine Änderung bereits verwendet.'
-
-    // Bestehenden Tipp laden
+    // Bestehenden Tipp laden + change_used prüfen
     const { data: existing } = await supabase
       .from('tournament_picks')
-      .select('champion_team_id, second_team_id, third_team_id, top_scorer, top_assist_player, best_player, tunisia_advances')
+      .select('champion_team_id, second_team_id, third_team_id, top_scorer, top_assist_player, best_player, tunisia_advances, change_used')
       .eq('user_id', user.id)
       .maybeSingle()
     if (!existing) return 'Kein bestehender Tipp gefunden.'
+    if (existing.change_used) return 'Du hast deine eine Änderung bereits verwendet.'
 
     // Anzahl geänderter Felder zählen
     const changedCount = [
@@ -93,7 +85,7 @@ export async function saveTournamentPick(input: TournamentPickInput): Promise<st
     if (changedCount === 0) return 'Du hast nichts geändert.'
     if (changedCount > 1) return `Du darfst nur 1 Antwort ändern, aber du hast ${changedCount} geändert.`
 
-    // Genau 1 Änderung — speichern
+    // Genau 1 Änderung — speichern + change_used markieren
     const { error } = await supabase
       .from('tournament_picks')
       .update({
@@ -104,15 +96,10 @@ export async function saveTournamentPick(input: TournamentPickInput): Promise<st
         top_assist_player: input.topAssistPlayer,
         best_player: input.bestPlayer,
         tunisia_advances: input.tunisiaAdvances,
+        change_used: true,
       })
       .eq('user_id', user.id)
     if (error) return `Fehler: ${error.message}`
-
-    // User-ID in JSON-Array eintragen
-    await supabase
-      .from('app_settings')
-      .update({ value: JSON.stringify([...usedUsers, user.id]) })
-      .eq('key', 'tournament_change_used_users')
 
     revalidatePath('/predict/tournament')
     return null

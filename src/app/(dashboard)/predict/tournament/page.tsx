@@ -23,13 +23,12 @@ export default async function TournamentPage() {
     .maybeSingle();
   const oneChangeMode = oneChangeSetting?.value === "true";
 
-  const { data: usedSetting } = await supabase
-    .from("app_settings")
-    .select("value")
-    .eq("key", "tournament_change_used_users")
+  const { data: userPick } = await supabase
+    .from("tournament_picks")
+    .select("change_used")
+    .eq("user_id", user!.id)
     .maybeSingle();
-  const usedUsers: string[] = JSON.parse(usedSetting?.value ?? "[]");
-  const changeUsed = usedUsers.includes(user!.id);
+  const changeUsed = userPick?.change_used === true;
 
   const { data: teams } = await supabase
     .from("teams")
