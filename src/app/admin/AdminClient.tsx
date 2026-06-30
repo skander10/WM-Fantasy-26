@@ -34,6 +34,17 @@ type TournamentResults = {
   tunisia_advances: boolean | null
   calculated_at: string | null
 }
+type TournamentPick = {
+  user_id: string
+  champion_team_id: number | null
+  second_team_id: number | null
+  third_team_id: number | null
+  top_scorer: string | null
+  top_assist_player: string | null
+  best_player: string | null
+  tunisia_advances: boolean | null
+  is_locked: boolean
+}
 
 export function AdminClient({
   players,
@@ -42,6 +53,7 @@ export function AdminClient({
   oneChangeMode,
   teams,
   tournamentResults,
+  tournamentPicks,
 }: {
   players: Player[]
   matches: Match[]
@@ -49,6 +61,7 @@ export function AdminClient({
   oneChangeMode: boolean
   teams: Team[]
   tournamentResults: TournamentResults | null
+  tournamentPicks: TournamentPick[]
 }) {
   const [tab, setTab] = useState<'players' | 'matches' | 'settings' | 'tournament'>('matches')
   const [tChampion, setTChampion] = useState(String(tournamentResults?.champion_team_id ?? ''))
@@ -318,6 +331,40 @@ export function AdminClient({
       {tab === 'tournament' && (
         <div className="flex flex-col gap-4">
           <p className="text-slate-400 text-xs">Trage das echte Turnier-Ergebnis ein und berechne die Punkte für alle Spieler.</p>
+
+          {/* Übersicht: Turnier-Tipps aller User */}
+          {tournamentPicks.length > 0 && (
+            <div className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden">
+              <p className="text-white text-sm font-semibold px-4 pt-4 pb-3">📋 Abgegebene Tipps ({tournamentPicks.length})</p>
+              <div className="flex flex-col divide-y divide-slate-700">
+                {tournamentPicks.map(pick => {
+                  const player = players.find(p => p.id === pick.user_id)
+                  const champion = teams.find(t => t.id === pick.champion_team_id)
+                  const second = teams.find(t => t.id === pick.second_team_id)
+                  const third = teams.find(t => t.id === pick.third_team_id)
+                  return (
+                    <div key={pick.user_id} className="px-4 py-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-white text-sm font-semibold">{player?.username ?? pick.user_id}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${pick.is_locked ? 'bg-red-400/10 text-red-400' : 'bg-emerald-400/10 text-emerald-400'}`}>
+                          {pick.is_locked ? '🔒' : '🔓'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <span className="text-slate-400">🏆 <span className="text-slate-200">{champion ? `${champion.flag} ${champion.name}` : '—'}</span></span>
+                        <span className="text-slate-400">🥈 <span className="text-slate-200">{second ? `${second.flag} ${second.name}` : '—'}</span></span>
+                        <span className="text-slate-400">🥉 <span className="text-slate-200">{third ? `${third.flag} ${third.name}` : '—'}</span></span>
+                        <span className="text-slate-400">🇹🇳 <span className="text-slate-200">{pick.tunisia_advances === null ? '—' : pick.tunisia_advances ? 'Ja' : 'Nein'}</span></span>
+                        <span className="text-slate-400">👟 <span className="text-slate-200">{pick.top_scorer || '—'}</span></span>
+                        <span className="text-slate-400">🎯 <span className="text-slate-200">{pick.top_assist_player || '—'}</span></span>
+                        <span className="col-span-2 text-slate-400">⭐ <span className="text-slate-200">{pick.best_player || '—'}</span></span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {tournamentResults?.calculated_at && (
             <div className="bg-emerald-400/10 border border-emerald-400/30 rounded-xl px-4 py-3 text-xs text-emerald-400">
