@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 type Pick = { matchId: number; homePick: number; awayPick: number }
@@ -113,6 +114,7 @@ export async function saveTournamentPick(input: TournamentPickInput): Promise<st
       .update({ value: JSON.stringify([...usedUsers, user.id]) })
       .eq('key', 'tournament_change_used_users')
 
+    revalidatePath('/predict/tournament')
     return null
   }
 

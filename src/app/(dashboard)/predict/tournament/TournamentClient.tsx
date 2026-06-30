@@ -89,10 +89,6 @@ export function TournamentClient({
   oneChangeMode: boolean
   changeUsed: boolean
 }) {
-  const isLocked = oneChangeMode
-    ? changeUsed
-    : (existing?.is_locked || globalLocked)
-
   const [champion, setChampion] = useState(String(existing?.champion_team_id ?? ''))
   const [second, setSecond] = useState(String(existing?.second_team_id ?? ''))
   const [third, setThird] = useState(String(existing?.third_team_id ?? ''))
@@ -103,6 +99,11 @@ export function TournamentClient({
     existing?.tunisia_advances === null ? '' : existing?.tunisia_advances ? 'yes' : 'no'
   )
   const [feedback, setFeedback] = useState('')
+  const [localChangeUsed, setLocalChangeUsed] = useState(changeUsed)
+
+  const isLocked = oneChangeMode
+    ? localChangeUsed
+    : (existing?.is_locked || globalLocked)
   const [isPending, startTransition] = useTransition()
 
   function handleSubmit() {
@@ -136,7 +137,8 @@ export function TournamentClient({
       if (error) {
         setFeedback(error)
       } else {
-        setFeedback('Tipp gespeichert und gesperrt ✅')
+        if (oneChangeMode) setLocalChangeUsed(true)
+        setFeedback('Änderung gespeichert ✅')
       }
     })
   }
@@ -202,7 +204,7 @@ export function TournamentClient({
     <div className="flex flex-col gap-4">
 
       {/* One-Change-Modus Banner */}
-      {oneChangeMode && !changeUsed && (
+      {oneChangeMode && !localChangeUsed && (
         <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl px-4 py-3 flex items-center gap-2">
           <span className="text-xl">✏️</span>
           <div>
@@ -211,7 +213,7 @@ export function TournamentClient({
           </div>
         </div>
       )}
-      {oneChangeMode && changeUsed && (
+      {oneChangeMode && localChangeUsed && (
         <div className="bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 flex items-center gap-2">
           <span className="text-xl">✅</span>
           <div>
