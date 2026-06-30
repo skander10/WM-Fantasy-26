@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Check, X } from 'lucide-react'
-import { setUserPaid, saveMatchResult, setTournamentLocked, saveTournamentResults, calculateTournamentPoints, addMatch, updateMatchDate } from '@/app/actions/admin'
+import { setUserPaid, saveMatchResult, setTournamentLocked, saveTournamentResults, calculateTournamentPoints, addMatch, updateMatchDate, setOneChangeMode } from '@/app/actions/admin'
 
 type Player = {
   id: string
@@ -39,12 +39,14 @@ export function AdminClient({
   players,
   matches,
   tournamentLocked,
+  oneChangeMode,
   teams,
   tournamentResults,
 }: {
   players: Player[]
   matches: Match[]
   tournamentLocked: boolean
+  oneChangeMode: boolean
   teams: Team[]
   tournamentResults: TournamentResults | null
 }) {
@@ -459,6 +461,48 @@ export function AdminClient({
             </div>
             {feedback['tournament'] && (
               <p className="text-xs text-center mt-2 text-amber-400">{feedback['tournament']}</p>
+            )}
+          </div>
+
+          {/* One-Change-Modus */}
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5">
+            <div className="flex items-start gap-3 mb-4">
+              <span className="text-2xl">✏️</span>
+              <div>
+                <p className="text-white font-semibold">1-Änderung-Modus</p>
+                <p className="text-slate-500 text-xs mt-0.5">
+                  Jeder User darf genau eine Antwort ändern. Mehr als 1 Änderung wird abgelehnt. Nach der Änderung ist der Tipp wieder endgültig gesperrt.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between bg-slate-700/50 rounded-xl px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-white">
+                  Status: {oneChangeMode
+                    ? <span className="text-amber-400">✏️ Aktiv</span>
+                    : <span className="text-slate-400">⏸ Inaktiv</span>}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  startTransition(async () => {
+                    const error = await setOneChangeMode(!oneChangeMode)
+                    if (error) showFeedback('onechange', error)
+                    else showFeedback('onechange', oneChangeMode ? 'Deaktiviert ✅' : 'Aktiviert ✏️')
+                  })
+                }}
+                disabled={isPending}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 ${
+                  oneChangeMode
+                    ? 'bg-red-400/10 hover:bg-red-400/20 text-red-400'
+                    : 'bg-amber-400/10 hover:bg-amber-400/20 text-amber-400'
+                }`}
+              >
+                {oneChangeMode ? '⏹ Deaktivieren' : '▶ Aktivieren'}
+              </button>
+            </div>
+            {feedback['onechange'] && (
+              <p className="text-xs text-center mt-2 text-amber-400">{feedback['onechange']}</p>
             )}
           </div>
         </div>

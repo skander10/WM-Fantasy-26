@@ -18,6 +18,12 @@ export default async function AdminPage() {
     .eq('key', 'tournament_picks_locked')
     .single()
 
+  const { data: oneChangeSetting } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'tournament_one_change_mode')
+    .maybeSingle()
+
   const { data: players } = await supabase
     .from('profiles')
     .select('id, username, first_name, last_name, paid')
@@ -49,6 +55,7 @@ export default async function AdminPage() {
         players={(players ?? []) as any}
         matches={(matches ?? []) as any}
         tournamentLocked={lockSetting?.value === 'true'}
+        oneChangeMode={oneChangeSetting?.value === 'true'}
         teams={(teams ?? []) as any}
         tournamentResults={tournamentResults ?? null}
       />

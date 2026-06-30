@@ -21,6 +21,21 @@ export async function setUserPaid(userId: string, paid: boolean): Promise<string
   return null
 }
 
+export async function setOneChangeMode(enabled: boolean): Promise<string | null> {
+  const supabase = await getAdminClient()
+  if (!supabase) return 'Keine Admin-Berechtigung.'
+  const { error } = await supabase
+    .from('app_settings')
+    .upsert(
+      { key: 'tournament_one_change_mode', value: enabled ? 'true' : 'false', updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    )
+  if (error) return error.message
+  revalidatePath('/admin')
+  revalidatePath('/predict/tournament')
+  return null
+}
+
 export async function setTournamentLocked(locked: boolean): Promise<string | null> {
   const supabase = await getAdminClient()
   if (!supabase) return 'Keine Admin-Berechtigung.'

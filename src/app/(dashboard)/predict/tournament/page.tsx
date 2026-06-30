@@ -15,6 +15,21 @@ export default async function TournamentPage() {
     .single();
   const globalLocked = lockSetting?.value === "true";
 
+  // One-Change-Modus prüfen
+  const { data: oneChangeSetting } = await supabase
+    .from("app_settings")
+    .select("value")
+    .eq("key", "tournament_one_change_mode")
+    .maybeSingle();
+  const oneChangeMode = oneChangeSetting?.value === "true";
+
+  const { data: usedSetting } = await supabase
+    .from("app_settings")
+    .select("value")
+    .eq("key", `change_used_${user!.id}`)
+    .maybeSingle();
+  const changeUsed = usedSetting?.value === "true";
+
   const { data: teams } = await supabase
     .from("teams")
     .select("id, name, flag, group_name")
@@ -123,6 +138,8 @@ export default async function TournamentPage() {
         teams={(teams ?? []) as any}
         existing={existing ?? null}
         globalLocked={globalLocked}
+        oneChangeMode={oneChangeMode}
+        changeUsed={changeUsed}
       />
     </div>
   );

@@ -80,12 +80,18 @@ export function TournamentClient({
   teams,
   existing,
   globalLocked,
+  oneChangeMode,
+  changeUsed,
 }: {
   teams: Team[]
   existing: ExistingPick | null
   globalLocked: boolean
+  oneChangeMode: boolean
+  changeUsed: boolean
 }) {
-  const isLocked = existing?.is_locked || globalLocked
+  const isLocked = oneChangeMode
+    ? changeUsed
+    : (existing?.is_locked || globalLocked)
 
   const [champion, setChampion] = useState(String(existing?.champion_team_id ?? ''))
   const [second, setSecond] = useState(String(existing?.second_team_id ?? ''))
@@ -195,8 +201,28 @@ export function TournamentClient({
   return (
     <div className="flex flex-col gap-4">
 
-      {/* Gesperrt-Banner */}
-      {isLocked && (
+      {/* One-Change-Modus Banner */}
+      {oneChangeMode && !changeUsed && (
+        <div className="bg-amber-400/10 border border-amber-400/30 rounded-xl px-4 py-3 flex items-center gap-2">
+          <span className="text-xl">✏️</span>
+          <div>
+            <p className="text-amber-400 font-semibold text-sm">1 Änderung verfügbar</p>
+            <p className="text-slate-400 text-xs">Du kannst genau eine Antwort ändern. Danach ist es endgültig gesperrt.</p>
+          </div>
+        </div>
+      )}
+      {oneChangeMode && changeUsed && (
+        <div className="bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-3 flex items-center gap-2">
+          <span className="text-xl">✅</span>
+          <div>
+            <p className="text-white font-semibold text-sm">Änderung verwendet</p>
+            <p className="text-slate-400 text-xs">Du hast deine eine Änderung bereits genutzt.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Normaler Gesperrt-Banner */}
+      {!oneChangeMode && isLocked && (
         <div className="bg-red-400/10 border border-red-400/30 rounded-xl px-4 py-3 flex items-center gap-2">
           <span className="text-xl">🔒</span>
           <div>
@@ -271,13 +297,19 @@ export function TournamentClient({
           disabled={isPending}
           className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-slate-900 font-bold py-3 rounded-2xl text-sm transition-colors"
         >
-          {isPending ? 'Speichern...' : existing ? 'Tipp abgeben & sperren' : 'Tipp abgeben & sperren'}
+          {isPending
+            ? 'Speichern...'
+            : oneChangeMode
+            ? 'Änderung speichern'
+            : 'Tipp abgeben & sperren'}
         </button>
       )}
 
       {!isLocked && (
         <p className="text-slate-600 text-xs text-center">
-          ⚠️ Nach dem Speichern kannst du deinen Tipp nicht mehr ändern.
+          {oneChangeMode
+            ? '⚠️ Du darfst nur 1 Antwort ändern. Danach ist die Möglichkeit weg.'
+            : '⚠️ Nach dem Speichern kannst du deinen Tipp nicht mehr ändern.'}
         </p>
       )}
     </div>

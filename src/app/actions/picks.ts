@@ -53,7 +53,68 @@ export async function saveTournamentPick(input: TournamentPickInput): Promise<st
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return 'Nicht eingeloggt.'
 
-  // Globale Sperre prüfen
+  // One-Change-Modus prüfen
+  const { data: oneChangeSetting } = await supabase
+    .from('app_settings')
+    .select('value')
+    .eq('key', 'tournament_one_change_mode')
+    .maybeSingle()
+
+  if (oneChangeSetting?.value === 'true') {
+    // Bereits verwendet?
+    const { data: usedSetting } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', `change_used_${user.id}`)
+      .maybeSingle()
+    if (usedSetting?.value === 'true') return 'Du hast deine eine Änderung bereits verwendet.'
+
+    // Bestehenden Tipp laden
+    const { data: existing } = await supabase
+      .from('tournament_picks')
+      .select('champion_team_id, second_team_id, third_team_id, top_scorer, top_assist_player, best_player, tunisia_advances')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (!existing) return 'Kein bestehender Tipp gefunden.'
+
+    // Anzahl geänderter Felder zählen
+    const changedCount = [
+      existing.champion_team_id !== input.championId,
+      existing.second_team_id !== input.secondId,
+      existing.third_team_id !== input.thirdId,
+      existing.top_scorer !== input.topScorer,
+      existing.top_assist_player !== input.topAssistPlayer,
+      existing.best_player !== input.bestPlayer,
+      existing.tunisia_advances !== input.tunisiaAdvances,
+    ].filter(Boolean).length
+
+    if (changedCount === 0) return 'Du hast nichts geändert.'
+    if (changedCount > 1) return `Du darfst nur 1 Antwort ändern, aber du hast ${changedCount} geändert.`
+
+    // Genau 1 Änderung — speichern
+    const { error } = await supabase
+      .from('tournament_picks')
+      .update({
+        champion_team_id: input.championId,
+        second_team_id: input.secondId,
+        third_team_id: input.thirdId,
+        top_scorer: input.topScorer,
+        top_assist_player: input.topAssistPlayer,
+        best_player: input.bestPlayer,
+        tunisia_advances: input.tunisiaAdvances,
+      })
+      .eq('user_id', user.id)
+    if (error) return `Fehler: ${error.message}`
+
+    // Änderung als verbraucht markieren
+    await supabase
+      .from('app_settings')
+      .upsert({ key: `change_used_${user.id}`, value: 'true' }, { onConflict: 'key' })
+
+    return null
+  }
+
+  // Normaler Modus: globale Sperre prüfen
   const { data: setting } = await supabase
     .from('app_settings')
     .select('value')
