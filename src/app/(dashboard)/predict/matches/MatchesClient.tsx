@@ -80,7 +80,7 @@ export function MatchesClient({
     })
   }
 
-  const BG_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkVaxFOGoaSGTolT2JQfBosbTbHK9QkdrFrwreCj6seA&s'
+  const BG_URL = 'https://www.ticombo.com/_next/image?url=%2Fhub-assets%2Fteams%2Fegypt.jpg&w=3840&q=75'
 
   if (matches.length === 0) {
     return (
