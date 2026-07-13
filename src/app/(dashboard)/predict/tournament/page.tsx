@@ -3,16 +3,15 @@ import { TournamentClient } from "./TournamentClient";
 
 export const dynamic = 'force-dynamic'
 
-type TeamInfo = { name: string; flag: string }
 type AllPick = {
   user_id: string
+  champion_team_id: number | null
+  second_team_id: number | null
+  third_team_id: number | null
   top_scorer: string | null
   top_assist_player: string | null
   best_player: string | null
   tunisia_advances: boolean | null
-  champion_team: TeamInfo | null
-  second_team: TeamInfo | null
-  third_team: TeamInfo | null
 }
 
 export default async function TournamentPage() {
@@ -73,11 +72,10 @@ export default async function TournamentPage() {
   // Alle Turnier-Tipps laden (braucht RLS policy "tp_read_all")
   const { data: allPicksRaw } = await supabase
     .from("tournament_picks")
-    .select(
-      "user_id, top_scorer, top_assist_player, best_player, tunisia_advances, champion_team:champion_team_id(name, flag), second_team:second_team_id(name, flag), third_team:third_team_id(name, flag)"
-    )
+    .select("user_id, champion_team_id, second_team_id, third_team_id, top_scorer, top_assist_player, best_player, tunisia_advances")
 
   const profileMap = Object.fromEntries((paidPlayers ?? []).map(p => [p.id, p.username]))
+  const teamMap = Object.fromEntries((teams ?? []).map(t => [t.id, { name: t.name, flag: t.flag }]))
   const allPicks = ((allPicksRaw ?? []) as unknown as AllPick[])
     .filter(p => profileMap[p.user_id])
     .sort((a, b) => (profileMap[a.user_id] ?? '').localeCompare(profileMap[b.user_id] ?? ''))
@@ -183,19 +181,22 @@ export default async function TournamentPage() {
                   <div>
                     <span className="text-slate-500">🏆 Weltmeister</span>
                     <p className="text-white font-medium mt-0.5">
-                      {pick.champion_team ? `${pick.champion_team.flag} ${pick.champion_team.name}` : '—'}
+                      {pick.champion_team_id && teamMap[pick.champion_team_id]
+                        ? `${teamMap[pick.champion_team_id].flag} ${teamMap[pick.champion_team_id].name}` : '—'}
                     </p>
                   </div>
                   <div>
                     <span className="text-slate-500">🥈 Finalist</span>
                     <p className="text-white font-medium mt-0.5">
-                      {pick.second_team ? `${pick.second_team.flag} ${pick.second_team.name}` : '—'}
+                      {pick.second_team_id && teamMap[pick.second_team_id]
+                        ? `${teamMap[pick.second_team_id].flag} ${teamMap[pick.second_team_id].name}` : '—'}
                     </p>
                   </div>
                   <div>
                     <span className="text-slate-500">🥉 3. Platz</span>
                     <p className="text-white font-medium mt-0.5">
-                      {pick.third_team ? `${pick.third_team.flag} ${pick.third_team.name}` : '—'}
+                      {pick.third_team_id && teamMap[pick.third_team_id]
+                        ? `${teamMap[pick.third_team_id].flag} ${teamMap[pick.third_team_id].name}` : '—'}
                     </p>
                   </div>
                   <div>
