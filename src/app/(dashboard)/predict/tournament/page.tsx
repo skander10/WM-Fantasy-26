@@ -1,6 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
 import { TournamentClient } from "./TournamentClient";
 
+export const dynamic = 'force-dynamic'
+
+type TeamInfo = { name: string; flag: string }
+type AllPick = {
+  user_id: string
+  top_scorer: string | null
+  top_assist_player: string | null
+  best_player: string | null
+  tunisia_advances: boolean | null
+  champion_team: TeamInfo | null
+  second_team: TeamInfo | null
+  third_team: TeamInfo | null
+}
+
 export default async function TournamentPage() {
   const supabase = await createClient();
   const {
@@ -47,7 +61,7 @@ export default async function TournamentPage() {
   // Wer hat Turnier-Tipps abgegeben?
   const { data: paidPlayers } = await supabase
     .from("profiles")
-    .select("username")
+    .select("id, username")
     .eq("paid", true)
     .order("username");
 
@@ -55,6 +69,18 @@ export default async function TournamentPage() {
   const submittedSet = new Set((submitted ?? []).map((r: { username: string }) => r.username));
   const notSubmitted = (paidPlayers ?? []).filter(p => !submittedSet.has(p.username));
   const submittedList = (paidPlayers ?? []).filter(p => submittedSet.has(p.username));
+
+  // Alle Turnier-Tipps laden (braucht RLS policy "tp_read_all")
+  const { data: allPicksRaw } = await supabase
+    .from("tournament_picks")
+    .select(
+      "user_id, top_scorer, top_assist_player, best_player, tunisia_advances, champion_team:champion_team_id(name, flag), second_team:second_team_id(name, flag), third_team:third_team_id(name, flag)"
+    )
+
+  const profileMap = Object.fromEntries((paidPlayers ?? []).map(p => [p.id, p.username]))
+  const allPicks = ((allPicksRaw ?? []) as unknown as AllPick[])
+    .filter(p => profileMap[p.user_id])
+    .sort((a, b) => (profileMap[a.user_id] ?? '').localeCompare(profileMap[b.user_id] ?? ''))
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 pb-24">
@@ -101,7 +127,6 @@ export default async function TournamentPage() {
         </div>
       )}
 
-
       {/* Punkte-Übersicht */}
       <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 mb-6 grid grid-cols-3 gap-2 text-xs text-center">
         <div>
@@ -141,6 +166,62 @@ export default async function TournamentPage() {
         oneChangeMode={oneChangeMode}
         changeUsed={changeUsed}
       />
+
+      {/* Alle Tipps Übersicht */}
+      {allPicks.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-white font-bold text-base mb-4">
+            Alle Tipps <span className="text-slate-500 font-normal text-sm">({allPicks.length})</span>
+          </h2>
+          <div className="flex flex-col gap-3">
+            {allPicks.map(pick => (
+              <div key={pick.user_id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
+                <p className="text-amber-400 font-bold text-sm mb-3">
+                  {pick.user_id === user!.id ? '👤 ' : ''}{profileMap[pick.user_id]}
+                </p>
+                <div className="grid grid-cols-2 gap-y-2 gap-x-3 text-xs">
+                  <div>
+                    <span className="text-slate-500">🏆 Weltmeister</span>
+                    <p className="text-white font-medium mt-0.5">
+                      {pick.champion_team ? `${pick.champion_team.flag} ${pick.champion_team.name}` : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">🥈 Finalist</span>
+                    <p className="text-white font-medium mt-0.5">
+                      {pick.second_team ? `${pick.second_team.flag} ${pick.second_team.name}` : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">🥉 3. Platz</span>
+                    <p className="text-white font-medium mt-0.5">
+                      {pick.third_team ? `${pick.third_team.flag} ${pick.third_team.name}` : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">🇹🇳 Tunesien</span>
+                    <p className="text-white font-medium mt-0.5">
+                      {pick.tunisia_advances === null ? '—' : pick.tunisia_advances ? 'Ja ✅' : 'Nein ❌'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">👟 Torschütze</span>
+                    <p className="text-white font-medium mt-0.5">{pick.top_scorer || '—'}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">🎯 Assists</span>
+                    <p className="text-white font-medium mt-0.5">{pick.top_assist_player || '—'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-slate-500">⭐ Bester Spieler</span>
+                    <p className="text-white font-medium mt-0.5">{pick.best_player || '—'}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
