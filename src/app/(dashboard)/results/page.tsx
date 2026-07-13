@@ -147,7 +147,7 @@ export default async function ResultsPage() {
   return (
     <div className="relative">
       <div className="fixed inset-0 z-0" style={{
-        backgroundImage: 'url(https://i.etsystatic.com/66038214/r/il/4056a0/8192632097/il_300x300.8192632097_77l9.jpg)',
+        backgroundImage: 'url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5xtRlTDl0VdfbCk8YIqRxCgfGdsHw4bhreC5uZUZ3GMmT00ZaXbq6QQ0&s=10)',
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
       }} />
