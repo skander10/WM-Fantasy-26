@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { TournamentClient } from "./TournamentClient";
+import { unstable_noStore as noStore } from 'next/cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +16,7 @@ type AllPick = {
 }
 
 export default async function TournamentPage() {
+  noStore()
   const supabase = await createClient();
   const {
     data: { user },
