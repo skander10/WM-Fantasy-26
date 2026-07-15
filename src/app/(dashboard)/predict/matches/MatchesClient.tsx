@@ -80,7 +80,7 @@ export function MatchesClient({
     })
   }
 
-  const BG_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGv6JbZBPvHSKjf3bltq4ciibdSJITXlZEh63o2ezIgslyhN7l6GtesFU&s=10'
+  const BG_URL = 'https://assets.bundesliga.com/contender/2026/6/BL_WorldCup2026_H2H_ENG-ARG_5x4.jpg?fit=540,540'
 
   if (matches.length === 0) {
     return (
