@@ -102,7 +102,21 @@ export function MatchesClient({
       <div className="fixed inset-0 z-0 bg-slate-900/40" />
 
       <div className="relative z-10 max-w-lg mx-auto px-4 pb-28 pt-6">
-      <h1 className="text-xl font-bold text-white mb-6">Spiele tippen</h1>
+      <h1 className="text-xl font-bold text-white mb-4">Spiele tippen</h1>
+
+      {/* Dankesnachricht */}
+      <div className="mb-6 rounded-2xl overflow-hidden border border-amber-400/30 bg-gradient-to-br from-amber-400/10 via-slate-800/80 to-slate-900/80 backdrop-blur-sm px-5 py-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-2xl">🏆</span>
+          <p className="text-amber-400 font-bold text-base">Das Finale ist da!</p>
+        </div>
+        <p className="text-slate-200 text-sm leading-relaxed">
+          Vielen Dank an alle, die von Anfang an dabei waren und mitgespielt haben — ihr habt dieses Turnier unvergesslich gemacht! 🙌
+        </p>
+        <p className="text-slate-300 text-sm leading-relaxed mt-2">
+          Jetzt kommt der letzte Tipp — gebt alles und viel Erfolg bei den Abschlusspunkten. Möge der Beste gewinnen! 🌟⚽
+        </p>
+      </div>
 
       {Object.entries(groups).map(([date, dayMatches]) => (
         <div key={date} className="mb-8">
