@@ -116,6 +116,7 @@ export function MatchesClient({
         <p className="text-slate-300 text-sm leading-relaxed mt-2">
           Jetzt kommt der letzte Tipp — gebt alles und viel Erfolg bei den Abschlusspunkten. Möge der Beste gewinnen! 🌟⚽
         </p>
+        <p className="text-slate-400 text-sm mt-3 text-right italic">Bis zur nächsten WM ❤️</p>
       </div>
 
       {Object.entries(groups).map(([date, dayMatches]) => (
