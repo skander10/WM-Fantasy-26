@@ -13,6 +13,7 @@ type AllPick = {
   top_assist_player: string | null
   best_player: string | null
   tunisia_advances: boolean | null
+  total_points: number | null
 }
 
 export default async function TournamentPage() {
@@ -74,7 +75,7 @@ export default async function TournamentPage() {
   // Alle Turnier-Tipps laden (braucht RLS policy "tp_read_all")
   const { data: allPicksRaw } = await supabase
     .from("tournament_picks")
-    .select("user_id, champion_team_id, second_team_id, third_team_id, top_scorer, top_assist_player, best_player, tunisia_advances")
+    .select("user_id, champion_team_id, second_team_id, third_team_id, top_scorer, top_assist_player, best_player, tunisia_advances, total_points")
 
   const profileMap = Object.fromEntries((paidPlayers ?? []).map(p => [p.id, p.username]))
   const teamMap = Object.fromEntries((teams ?? []).map(t => [t.id, { name: t.name, flag: t.flag }]))
@@ -176,9 +177,16 @@ export default async function TournamentPage() {
           <div className="flex flex-col gap-3">
             {allPicks.map(pick => (
               <div key={pick.user_id} className="bg-slate-800 border border-slate-700 rounded-2xl p-4">
-                <p className="text-amber-400 font-bold text-sm mb-3">
-                  {pick.user_id === user!.id ? '👤 ' : ''}{profileMap[pick.user_id]}
-                </p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-amber-400 font-bold text-sm">
+                    {pick.user_id === user!.id ? '👤 ' : ''}{profileMap[pick.user_id]}
+                  </p>
+                  {pick.total_points !== null && pick.total_points !== undefined && (
+                    <span className="bg-amber-400/15 border border-amber-400/30 text-amber-400 text-xs font-bold px-2.5 py-1 rounded-full">
+                      🎁 {pick.total_points} Bonus-Pkt
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-y-2 gap-x-3 text-xs">
                   <div>
                     <span className="text-slate-500">🏆 Weltmeister</span>
